@@ -6,3 +6,6 @@ __pycache__
 .env
 tools/jdk-17.0.14+7-jre/
 tools/jdk.zip
+tools/gh/gh.zip
+tools/gh/LICENSE
+tools/gh/bin/gh.exe
