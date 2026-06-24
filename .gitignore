@@ -4,3 +4,5 @@ __pycache__
 .vscode
 .coverage
 .env
+tools/jdk-17.0.14+7-jre/
+tools/jdk.zip
