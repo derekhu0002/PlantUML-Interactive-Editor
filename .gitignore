@@ -9,3 +9,17 @@ tools/jdk.zip
 tools/gh/gh.zip
 tools/gh/LICENSE
 tools/gh/bin/gh.exe
+
+# Node.js
+node_modules/
+dist/
+dist-electron/
+release/
+
+# Vite
+*.local
+
+# IDE
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,1281 @@
+{
+    "name":  "PlantUML Interactive Desktop Editor",
+    "description":  "Intent architecture for porting the PlantUML Interactive Editor web app to a Windows desktop application with drag-and-drop editing, free-form canvas positioning, and one-click export.",
+    "elements":  [
+                     {
+                         "id":  "ele-root",
+                         "name":  "SystemArchitecture",
+                         "type":  "Grouping",
+                         "description":  "Top-level architecture grouping for the PlantUML Desktop Editor"
+                     },
+                     {
+                         "id":  "mot-goal-desktop",
+                         "name":  "Deliver PlantUML Desktop Editor",
+                         "type":  "Goal",
+                         "description":  "Transform existing web-based PlantUML Interactive Editor into a self-contained Windows desktop application with drag-and-drop editing",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-GOAL-1",
+                                               "description":  "Goal: Transform web-based PlantUML Interactive Editor into self-contained Windows desktop app with drag-and-drop",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Complete application build; verify no browser or server required for editing",
+                                               "acceptanceCriteria":  "tests/goals/test_goal_desktop_app.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Complete application build; verify no browser or server required for editing",
+                                               "observationPoint":  "Verified via: tests/goals/test_goal_desktop_app.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "mot-driver-need",
+                         "name":  "Developer need for intuitive PlantUML editing on Windows",
+                         "type":  "Driver",
+                         "description":  "Developers want a visual interactive tool to create PlantUML diagrams without learning PlantUML syntax",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-DRIVER-NEED-1",
+                                               "description":  "Driver: Developer need for intuitive PlantUML editing on Windows 鈥?developers create a complete Activity Diagram without writing PlantUML syntax manually",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "First-time developer uses the application to create an Activity Diagram with at least 5 nodes, branching, and connections",
+                                               "acceptanceCriteria":  "tests/drivers/test_driver_need.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "First-time developer uses the application to create an Activity Diagram with at least 5 nodes, branching, and connections",
+                                               "observationPoint":  "Verified via: tests/drivers/test_driver_need.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "mot-driver-zero",
+                         "name":  "Zero-configuration setup requirement",
+                         "type":  "Driver",
+                         "description":  "Users expect to install with defaults and start immediately, without Python, Java, or environment variable setup",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-DRIVER-ZERO-1",
+                                               "description":  "Driver: Zero-configuration setup requirement 鈥?application works immediately after install with no manual runtime setup",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Clean Windows 10/11 VM. Download installer, install with default settings, launch application",
+                                               "acceptanceCriteria":  "tests/drivers/test_driver_zero_config.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Clean Windows 10/11 VM. Download installer, install with default settings, launch application",
+                                               "observationPoint":  "Verified via: tests/drivers/test_driver_zero_config.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "mot-assessment-web",
+                         "name":  "Assessment: Current web app friction",
+                         "type":  "Assessment",
+                         "description":  "Current web app requires Python, Java, PlantUML JAR download, .env configuration, and browser launch. High setup friction limits adoption.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-ASSESS-1",
+                                               "description":  "Assessment: Current web app friction resolved 鈥?desktop app eliminates the specific friction points: no Python setup, no Java setup, no .env configuration, no browser launch",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Audit the delivered desktop application against the five identified friction points from the web app",
+                                               "acceptanceCriteria":  "tests/assess/test_assessment_web_friction.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Audit the delivered desktop application against the five identified friction points from the web app",
+                                               "observationPoint":  "Verified via: tests/assess/test_assessment_web_friction.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "mot-principle-install",
+                         "name":  "Principle: Single-click zero-config installer",
+                         "type":  "Principle",
+                         "description":  "Application MUST be installable by clicking Next-Next-Finish. All dependencies handled automatically on first launch.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-PRINC-INSTALL-1",
+                                               "description":  "Principle: Single-click zero-config installer 鈥?application MUST be installable by clicking Next-Next-Finish",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Run NSIS installer on a clean Windows 10/11 PC",
+                                               "acceptanceCriteria":  "tests/principles/test_principle_install.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Run NSIS installer on a clean Windows 10/11 PC",
+                                               "observationPoint":  "Verified via: tests/principles/test_principle_install.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "mot-principle-freeform",
+                         "name":  "Principle: Free-form canvas positioning",
+                         "type":  "Principle",
+                         "description":  "Users can freely position elements anywhere via drag-and-drop. PlantUML auto-layout NOT used for editing. .puml export contains structure only.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-PRINC-FREEFORM-1",
+                                               "description":  "Principle: Free-form canvas positioning 鈥?users can freely position elements anywhere via drag-and-drop; .puml export contains logical structure only, no positional data",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Drag multiple elements to arbitrary positions on canvas; export to .puml",
+                                               "acceptanceCriteria":  "tests/principles/test_principle_freeform.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Drag multiple elements to arbitrary positions on canvas; export to .puml",
+                                               "observationPoint":  "Verified via: tests/principles/test_principle_freeform.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "mot-principle-sync",
+                         "name":  "Principle: Last-write-wins bidirectional sync",
+                         "type":  "Principle",
+                         "description":  "Canvas and code editor synced bidirectionally. Last modification by timestamp wins and regenerates the other.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-PRINC-SYNC-1",
+                                               "description":  "Principle: Last-write-wins bidirectional sync 鈥?canvas and code editor synced bidirectionally; last modification by timestamp wins",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Edit canvas by moving a node, then immediately edit code by typing. Observe sync behavior.",
+                                               "acceptanceCriteria":  "tests/principles/test_principle_sync.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Edit canvas by moving a node, then immediately edit code by typing. Observe sync behavior.",
+                                               "observationPoint":  "Verified via: tests/principles/test_principle_sync.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "mot-req-dragdrop",
+                         "name":  "Requirement: Drag-and-drop Activity Diagram editing",
+                         "type":  "Requirement",
+                         "description":  "Users can drag elements from a palette onto a canvas and position them freely. All three levels must be supported: A) add from palette, B) reorder/move on canvas, C) reconnect arrows.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-REQ-DD-1",
+                                               "description":  "Requirement: Users can drag elements from palette onto canvas and position them freely. All three levels (add, reposition, reconnect) are supported.",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Open app, drag Activity from palette to canvas, drag existing node to new position, drag connector handle from node A to node B",
+                                               "acceptanceCriteria":  "tests/requirements/test_req_dragdrop.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Open app, drag Activity from palette to canvas, drag existing node to new position, drag connector handle from node A to node B",
+                                               "observationPoint":  "Verified via: tests/requirements/test_req_dragdrop.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "mot-req-export",
+                         "name":  "Requirement: One-click export to .puml and .png",
+                         "type":  "Requirement",
+                         "description":  "Users can export diagrams with a single click. .puml export contains logical structure only. .png export renders via PlantUML.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-REQ-EX-1",
+                                               "description":  "Requirement: One-click export to .puml (logical structure only) and .png (rendered via PlantUML)",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "File鈫扙xport鈫?puml, File鈫扙xport鈫?png",
+                                               "acceptanceCriteria":  "tests/requirements/test_req_export.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "File鈫扙xport鈫?puml, File鈫扙xport鈫?png",
+                                               "observationPoint":  "Verified via: tests/requirements/test_req_export.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "mot-req-import",
+                         "name":  "Requirement: Import existing .puml files",
+                         "type":  "Requirement",
+                         "description":  "Users can open existing .puml files. Parser reconstructs AST from text and lays out elements on a default grid for further editing.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-REQ-IM-1",
+                                               "description":  "Requirement: Import existing .puml files 鈥?parser reconstructs AST and lays out elements on a default grid for editing",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "File鈫扥pen鈫抯elect .puml file with Activity Diagram content",
+                                               "acceptanceCriteria":  "tests/requirements/test_req_import.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "File鈫扥pen鈫抯elect .puml file with Activity Diagram content",
+                                               "observationPoint":  "Verified via: tests/requirements/test_req_import.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "mot-req-sync",
+                         "name":  "Requirement: Bidirectional canvas-code synchronization",
+                         "type":  "Requirement",
+                         "description":  "Canvas edits update code editor, code editor edits update canvas. Last-write-wins conflict resolution. Fingerprint matching preserves element positions across re-parses.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-REQ-SYNC-1",
+                                               "description":  "Requirement: Bidirectional canvas-code sync with last-write-wins conflict resolution and 200ms debounce",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Edit canvas (dray node), observe code editor updates. Edit code, observe canvas updates. Make simultaneous edits.",
+                                               "acceptanceCriteria":  "tests/requirements/test_req_sync.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Edit canvas (dray node), observe code editor updates. Edit code, observe canvas updates. Make simultaneous edits.",
+                                               "observationPoint":  "Verified via: tests/requirements/test_req_sync.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "mot-constraint-electron",
+                         "name":  "Constraint: Electron + React + TypeScript stack",
+                         "type":  "Constraint",
+                         "description":  "Desktop application built with Electron shell, React with TypeScript, Vite build tool. ReactFlow for canvas. Ace Editor for code.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-CONST-ELECTRON-1",
+                                               "description":  "Constraint: Desktop app built with Electron + React + TypeScript + Vite stack",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Inspect package.json, tsconfig, and build scripts",
+                                               "acceptanceCriteria":  "tests/constraints/test_constraint_electron.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Inspect package.json, tsconfig, and build scripts",
+                                               "observationPoint":  "Verified via: tests/constraints/test_constraint_electron.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "mot-constraint-windows",
+                         "name":  "Constraint: Windows-only desktop application",
+                         "type":  "Constraint",
+                         "description":  "Target platform is Windows 10/11 64-bit. Installer via electron-builder + NSIS. No cross-platform requirement for MVP.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-CONST-WIN-1",
+                                               "description":  "Constraint: Windows-only (10/11 64-bit) with NSIS installer via electron-builder",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Build installer on Windows; install on clean Windows 10/11 VM",
+                                               "acceptanceCriteria":  "tests/constraints/test_constraint_windows.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Build installer on Windows; install on clean Windows 10/11 VM",
+                                               "observationPoint":  "Verified via: tests/constraints/test_constraint_windows.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "mot-constraint-python-backend",
+                         "name":  "Constraint: Python backend minimal footprint",
+                         "type":  "Constraint",
+                         "description":  "Python backend retained ONLY for PlantUML rendering API (SVG/PNG generation via Java subprocess). All ~40 existing PlantUML manipulation endpoints replaced by TypeScript AST.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-CONST-PY-1",
+                                               "description":  "Constraint: Python backend retained ONLY for render endpoints; all ~40 manipulation endpoints replaced by TypeScript AST",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Inspect Python backend source; compare endpoints with architecture intent",
+                                               "acceptanceCriteria":  "tests/constraints/test_constraint_python_backend.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Inspect Python backend source; compare endpoints with architecture intent",
+                                               "observationPoint":  "Verified via: tests/constraints/test_constraint_python_backend.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "mot-outcome",
+                         "name":  "Outcome: Developers create PlantUML diagrams via drag-and-drop on Windows",
+                         "type":  "Outcome",
+                         "description":  "Users install the desktop app once, drag-and-drop to create/edit PlantUML activity diagrams, export .puml and .png, without any manual environment setup.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-OUTCOME-1",
+                                               "description":  "Outcome: Developers create/edit PlantUML activity diagrams via drag-and-drop and export .puml/.png without manual environment setup",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "First-time user installs and uses the application end-to-end",
+                                               "acceptanceCriteria":  "tests/outcome/test_outcome.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "First-time user installs and uses the application end-to-end",
+                                               "observationPoint":  "Verified via: tests/outcome/test_outcome.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "app-concern-a",
+                         "name":  "Concern A: AST Data Model",
+                         "type":  "Application Component",
+                         "description":  "Defines all TypeScript types for PlantUML activity diagram elements (ActivityNode, IfNode, WhileNode, ForkNode, SwitchNode, etc.), ContainerNode abstraction, DiagramModel, and EdgeData. Foundation for all other concerns.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-AST-1",
+                                               "description":  "AST Data Model defines all TypeScript types for PlantUML Activity Diagram elements (ActivityNode, IfNode, WhileNode, ForkNode, SwitchNode, ContainerNode, DiagramModel, EdgeData) and they compile without type errors",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "TypeScript compiler checks all AST type definitions in the model module",
+                                               "acceptanceCriteria":  "tests/model/test_ast_types.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "TypeScript compiler checks all AST type definitions in the model module",
+                                               "observationPoint":  "Verified via: tests/model/test_ast_types.mjs"
+                                           },
+                                           {
+                                               "name":  "TC-AST-2",
+                                               "description":  "AST Data Model supports serialization/deserialization to/from JSON for save/load round-trip",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Create a DiagramModel instance with nested containers and edges, serialize to JSON, deserialize back",
+                                               "acceptanceCriteria":  "tests/model/test_ast_serialization.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Create a DiagramModel instance with nested containers and edges, serialize to JSON, deserialize back",
+                                               "observationPoint":  "Verified via: tests/model/test_ast_serialization.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "app-concern-b",
+                         "name":  "Concern B: ReactFlow Canvas Engine",
+                         "type":  "Application Component",
+                         "description":  "ReactFlow-based free-form canvas with custom node renderers for each PlantUML element type. Handles drag-and-drop, free positioning, connection handles, container nesting visualization.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-B-1",
+                                               "description":  "ReactFlow Canvas renders custom node types for each PlantUML element (StartNode, StopNode, ActivityNode, IfNode, WhileNode, ForkNode, SwitchNode) on a free-form canvas",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Initialize ReactFlow with a DiagramModel containing one node of each type",
+                                               "acceptanceCriteria":  "tests/e2e/test_canvas_node_types.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Initialize ReactFlow with a DiagramModel containing one node of each type",
+                                               "observationPoint":  "Verified via: tests/e2e/test_canvas_node_types.mjs"
+                                           },
+                                           {
+                                               "name":  "TC-B-2",
+                                               "description":  "Canvas supports all 3 drag-and-drop levels: A) palette to canvas, B) reposition on canvas, C) connector handle to create edge",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "A) Drag from palette onto empty canvas. B) Drag existing node to new position. C) Drag connector handle from node A to node B.",
+                                               "acceptanceCriteria":  "tests/e2e/test_canvas_dragdrop_levels.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "A) Drag from palette onto empty canvas. B) Drag existing node to new position. C) Drag connector handle from node A to node B.",
+                                               "observationPoint":  "Verified via: tests/e2e/test_canvas_dragdrop_levels.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "app-concern-c",
+                         "name":  "Concern C: Ace Code Editor Wrapper",
+                         "type":  "Application Component",
+                         "description":  "Wraps Ace Editor with PlantUML syntax highlighting, line markers for canvas-code correspondence, and keyboard shortcuts. Provides the code editing modality.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-C-1",
+                                               "description":  "Ace Editor wrapper displays PlantUML code with syntax highlighting for Activity Diagram keywords (@startuml, @enduml, :Activity, if/else/endif, while/endwhile, fork/endfork, split/endsplit)",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Load a .puml Activity Diagram file into the Ace Editor",
+                                               "acceptanceCriteria":  "tests/e2e/test_editor_syntax_highlighting.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Load a .puml Activity Diagram file into the Ace Editor",
+                                               "observationPoint":  "Verified via: tests/e2e/test_editor_syntax_highlighting.mjs"
+                                           },
+                                           {
+                                               "name":  "TC-C-2",
+                                               "description":  "Code editor change events are emitted with debounce for bidirectional sync",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Type in Ace Editor; observe event emission timing",
+                                               "acceptanceCriteria":  "tests/e2e/test_editor_debounce_events.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Type in Ace Editor; observe event emission timing",
+                                               "observationPoint":  "Verified via: tests/e2e/test_editor_debounce_events.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "app-concern-d",
+                         "name":  "Concern D: Bidirectional Sync Engine",
+                         "type":  "Application Component",
+                         "description":  "Manages canvas鈫攃ode synchronization with version numbers and timestamps. Implements last-write-wins conflict resolution. Maintains position-preserving fingerprint matching across re-parses.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-D-1",
+                                               "description":  "Bidirectional Sync applies last-write-wins: the last modification (by timestamp) between canvas and code wins and regenerates the other",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Make a canvas edit, then within the 200ms debounce window make a code edit. Wait for sync.",
+                                               "acceptanceCriteria":  "tests/e2e/test_sync_last_write_wins.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Make a canvas edit, then within the 200ms debounce window make a code edit. Wait for sync.",
+                                               "observationPoint":  "Verified via: tests/e2e/test_sync_last_write_wins.mjs"
+                                           },
+                                           {
+                                               "name":  "TC-D-2",
+                                               "description":  "Fingerprint matching preserves element positions across re-parses when importing/re-opening .puml files",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Edit a diagram, export to .puml, re-import the .puml file",
+                                               "acceptanceCriteria":  "tests/e2e/test_sync_fingerprint_preservation.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Edit a diagram, export to .puml, re-import the .puml file",
+                                               "observationPoint":  "Verified via: tests/e2e/test_sync_fingerprint_preservation.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "app-concern-e",
+                         "name":  "Concern E: PlantUML Parser and Generator",
+                         "type":  "Application Component",
+                         "description":  "Parser: PlantUML text to AST with stack-based nesting tracking and forward/backward scanning for block boundaries. Generator: AST to PlantUML text with depth-tracked indentation. Both include tolerance for unsupported/partially-parsed elements.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-E-1",
+                                               "description":  "Parser correctly converts Activity Diagram PlantUML text to AST with stack-based nesting tracking for if/while/fork containers",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "@startuml\n:Action1;\nif (cond) then\n  :ThenAction;\nelse\n  :ElseAction;\nendif\n:Action2;\n@enduml",
+                                               "acceptanceCriteria":  "tests/parser/test_parser_activity_diagram.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "@startuml\n:Action1;\nif (cond) then\n  :ThenAction;\nelse\n  :ElseAction;\nendif\n:Action2;\n@enduml",
+                                               "observationPoint":  "Verified via: tests/parser/test_parser_activity_diagram.mjs"
+                                           },
+                                           {
+                                               "name":  "TC-E-2",
+                                               "description":  "Generator converts AST back to valid PlantUML text with depth-tracked indentation",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Take a parsed AST, generate PlantUML text, re-parse the generated text",
+                                               "acceptanceCriteria":  "tests/generator/test_generator_roundtrip.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Take a parsed AST, generate PlantUML text, re-parse the generated text",
+                                               "observationPoint":  "Verified via: tests/generator/test_generator_roundtrip.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "app-concern-f",
+                         "name":  "Concern F: Component Palette",
+                         "type":  "Application Component",
+                         "description":  "Left-panel draggable element palette. Categories: Flow (Activity, Start, Stop, Connector), Structure (If, While, Fork, Switch), Decoration (Note, Group, Title). Drag preview and snap-zone indicators.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-F-1",
+                                               "description":  "Component Palette displays draggable element categories: Flow (Activity, Start, Stop, Connector), Structure (If, While, Fork, Switch), Decoration (Note, Group, Title)",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Open the application; inspect the left-panel palette",
+                                               "acceptanceCriteria":  "tests/e2e/test_palette_categories.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Open the application; inspect the left-panel palette",
+                                               "observationPoint":  "Verified via: tests/e2e/test_palette_categories.mjs"
+                                           },
+                                           {
+                                               "name":  "TC-F-2",
+                                               "description":  "Dragging an item from palette to canvas creates a new element of the correct type at the drop position",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Drag \u0027Activity\u0027 from palette to canvas at position (200, 300)",
+                                               "acceptanceCriteria":  "tests/e2e/test_palette_drag_to_canvas.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Drag \u0027Activity\u0027 from palette to canvas at position (200, 300)",
+                                               "observationPoint":  "Verified via: tests/e2e/test_palette_drag_to_canvas.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "app-concern-g",
+                         "name":  "Concern G: Electron Desktop Shell",
+                         "type":  "Application Component",
+                         "description":  "Electron main process: window management, native menus (File/Edit/Help), file dialogs for import/export, subprocess management for Python backend, JRE download on first launch, auto-updater.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-G-1",
+                                               "description":  "Electron Desktop Shell provides native menus: File (Open, Export .puml, Export .png, Exit), Edit (Undo, Redo), Help (About)",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Click each menu item in the application window",
+                                               "acceptanceCriteria":  "tests/e2e/test_electron_native_menus.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Click each menu item in the application window",
+                                               "observationPoint":  "Verified via: tests/e2e/test_electron_native_menus.mjs"
+                                           },
+                                           {
+                                               "name":  "TC-G-2",
+                                               "description":  "Electron manages Python render backend subprocess lifecycle: spawn on first export, health-check polling, graceful shutdown",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Trigger first .png export; close application",
+                                               "acceptanceCriteria":  "tests/e2e/test_electron_python_subprocess.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Trigger first .png export; close application",
+                                               "observationPoint":  "Verified via: tests/e2e/test_electron_python_subprocess.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "tech-electron",
+                         "name":  "Electron",
+                         "type":  "System Software",
+                         "description":  "Desktop application shell providing Chromium renderer, Node.js main process, native APIs (file dialogs, menus, subprocess management)",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-TECH-ELECTRON-1",
+                                               "description":  "Electron provides Chromium renderer, Node.js main process, and native APIs (file dialogs, menus, subprocess)",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Start the application; verify Electron runtime",
+                                               "acceptanceCriteria":  "tests/tech/test_tech_electron.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Start the application; verify Electron runtime",
+                                               "observationPoint":  "Verified via: tests/tech/test_tech_electron.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "tech-react-ts",
+                         "name":  "React + TypeScript + Vite",
+                         "type":  "System Software",
+                         "description":  "UI framework (React 18+), type-safe language (TypeScript), and build tool (Vite) for the renderer process",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-TECH-REACT-1",
+                                               "description":  "React 18+ with TypeScript strict mode and Vite build tool",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Build the application; verify TypeScript compilation",
+                                               "acceptanceCriteria":  "tests/tech/test_tech_react_ts.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Build the application; verify TypeScript compilation",
+                                               "observationPoint":  "Verified via: tests/tech/test_tech_react_ts.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "tech-reactflow",
+                         "name":  "ReactFlow",
+                         "type":  "System Software",
+                         "description":  "Node-based canvas library for interactive diagram editing with custom node types, edge types, connection handles, and group/container support",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-TECH-RF-1",
+                                               "description":  "ReactFlow provides node-based canvas with custom node/edge types, connection handles, and group/container support",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Initialize ReactFlow with custom node types defined by Concern A AST",
+                                               "acceptanceCriteria":  "tests/tech/test_tech_reactflow.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Initialize ReactFlow with custom node types defined by Concern A AST",
+                                               "observationPoint":  "Verified via: tests/tech/test_tech_reactflow.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "tech-ace",
+                         "name":  "Ace Editor",
+                         "type":  "System Software",
+                         "description":  "Browser-based code editor with PlantUML syntax highlighting, line markers, and keyboard shortcut customization",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-TECH-ACE-1",
+                                               "description":  "Ace Editor with PlantUML syntax highlighting, line markers, and keyboard shortcuts",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Open a .puml file in Ace Editor",
+                                               "acceptanceCriteria":  "tests/tech/test_tech_ace.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Open a .puml file in Ace Editor",
+                                               "observationPoint":  "Verified via: tests/tech/test_tech_ace.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "tech-nodejs",
+                         "name":  "Node.js",
+                         "type":  "System Software",
+                         "description":  "JavaScript runtime for Electron main process and npm package management",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-TECH-NODE-1",
+                                               "description":  "Node.js runtime for Electron main process and npm package management",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Verify Node.js runtime availability",
+                                               "acceptanceCriteria":  "tests/tech/test_tech_nodejs.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Verify Node.js runtime availability",
+                                               "observationPoint":  "Verified via: tests/tech/test_tech_nodejs.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "tech-jre",
+                         "name":  "JRE (jlink minimal)",
+                         "type":  "System Software",
+                         "description":  "Minimal Java runtime (~40MB) generated by jlink containing only java.base and java.xml modules. Downloaded on first launch.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-TECH-JRE-1",
+                                               "description":  "JRE (jlink minimal, ~40MB) downloaded on first launch with progress indicator",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "First launch on clean Windows PC without JRE installed",
+                                               "acceptanceCriteria":  "tests/tech/test_tech_jre.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "First launch on clean Windows PC without JRE installed",
+                                               "observationPoint":  "Verified via: tests/tech/test_tech_jre.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "tech-python-backend",
+                         "name":  "Python Render Backend (PyInstaller)",
+                         "type":  "Application Component",
+                         "description":  "PyInstaller-packaged Python Flask app retaining only the /render (SVG) and /renderPNG (PNG) endpoints. Spawned as subprocess by Electron. Uses JRE + plantuml.jar for rendering.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-TECH-PY-1",
+                                               "description":  "Python Render Backend (PyInstaller) serves only /render (SVG) and /renderPNG endpoints via Flask",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Start Python backend; call /render and /renderPNG endpoints",
+                                               "acceptanceCriteria":  "tests/tech/test_tech_python_backend.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Start Python backend; call /render and /renderPNG endpoints",
+                                               "observationPoint":  "Verified via: tests/tech/test_tech_python_backend.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "tech-windows-pc",
+                         "name":  "Windows PC",
+                         "type":  "Device",
+                         "description":  "Target deployment platform: Windows 10/11 64-bit PC with internet connection for initial setup",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-TECH-WIN-1",
+                                               "description":  "Target platform: Windows 10/11 64-bit with internet connection for initial setup",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Install and run the NSIS installer on Windows 10 and Windows 11 (64-bit)",
+                                               "acceptanceCriteria":  "tests/tech/test_tech_windows.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Install and run the NSIS installer on Windows 10 and Windows 11 (64-bit)",
+                                               "observationPoint":  "Verified via: tests/tech/test_tech_windows.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "tech-installer",
+                         "name":  "NSIS Installer Artifact",
+                         "type":  "Artifact",
+                         "description":  "electron-builder + NSIS generates self-contained .exe installer. Bundles Electron runtime and Python backend exe.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-TECH-INST-1",
+                                               "description":  "NSIS Installer Artifact: self-contained .exe bundling Electron runtime and Python backend",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Build NSIS installer; perform clean install",
+                                               "acceptanceCriteria":  "tests/tech/test_tech_installer.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Build NSIS installer; perform clean install",
+                                               "observationPoint":  "Verified via: tests/tech/test_tech_installer.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "tech-plantuml-jar",
+                         "name":  "PlantUML JAR Artifact",
+                         "type":  "Artifact",
+                         "description":  "PlantUML Java library ~20MB for SVG/PNG rendering. Downloaded on first launch.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-TECH-PLANTUML-1",
+                                               "description":  "PlantUML JAR (~20MB) downloaded on first launch for SVG/PNG rendering",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "First launch without plantuml.jar; trigger .png export",
+                                               "acceptanceCriteria":  "tests/tech/test_tech_plantuml_jar.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "First launch without plantuml.jar; trigger .png export",
+                                               "observationPoint":  "Verified via: tests/tech/test_tech_plantuml_jar.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "strat-coa-port",
+                         "name":  "Work Package: Port web app to Electron desktop",
+                         "type":  "Work Package",
+                         "description":  "Port the existing Flask + JS web application into a self-contained Electron desktop app. Replace JS manipulation logic with TypeScript AST engine. Retain only Python render backend.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-STRAT-WP-1",
+                                               "description":  "Work Package: Port web app to Electron desktop, replacing JS manipulation with TypeScript AST, retaining Python render backend",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Audit the delivered application source code",
+                                               "acceptanceCriteria":  "tests/strategy/test_strategy_workpackage.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Audit the delivered application source code",
+                                               "observationPoint":  "Verified via: tests/strategy/test_strategy_workpackage.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "strat-capability",
+                         "name":  "Capability: Desktop PlantUML Editing",
+                         "type":  "Capability",
+                         "description":  "Offer a professional-grade, desktop-native PlantUML editing tool requiring no server infrastructure or browser.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-STRAT-CAP-1",
+                                               "description":  "Capability: Professional-grade desktop-native PlantUML editing tool requiring no server infrastructure",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Use the application offline after initial setup",
+                                               "acceptanceCriteria":  "tests/strategy/test_strategy_capability.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Use the application offline after initial setup",
+                                               "observationPoint":  "Verified via: tests/strategy/test_strategy_capability.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "biz-service-editing",
+                         "name":  "Business Service: Diagram Editing Service",
+                         "type":  "Business Service",
+                         "description":  "Provides interactive drag-and-drop editing of PlantUML diagrams with real-time preview and export capabilities",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-BIZ-SVC-1",
+                                               "description":  "Business Service: Interactive drag-and-drop editing with real-time preview and export",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Complete end-to-end workflow: create, edit, export diagram",
+                                               "acceptanceCriteria":  "tests/e2e/test_biz_service_end_to_end.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Complete end-to-end workflow: create, edit, export diagram",
+                                               "observationPoint":  "Verified via: tests/e2e/test_biz_service_end_to_end.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "biz-actor-developer",
+                         "name":  "Business Actor: Developer",
+                         "type":  "Business Actor",
+                         "description":  "Software developers and architects who design system diagrams using PlantUML notation",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-BIZ-ACTOR-1",
+                                               "description":  "Actor: Software developers and architects using the tool to design PlantUML diagrams",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Target user persona completes a typical diagramming task",
+                                               "acceptanceCriteria":  "tests/business/test_biz_actor.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Target user persona completes a typical diagramming task",
+                                               "observationPoint":  "Verified via: tests/business/test_biz_actor.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "biz-process-edit",
+                         "name":  "Business Process: Edit Diagram",
+                         "type":  "Business Process",
+                         "description":  "User workflow: palette drag to canvas placement, connection creation, container nesting, code sync, layout adjustment",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-BIZ-PROC-EDIT-1",
+                                               "description":  "Business Process: Edit Diagram workflow 鈥?palette drag to canvas, connection, nesting, code sync, layout",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Execute the full edit workflow",
+                                               "acceptanceCriteria":  "tests/business/test_biz_process_edit.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Execute the full edit workflow",
+                                               "observationPoint":  "Verified via: tests/business/test_biz_process_edit.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "biz-process-export",
+                         "name":  "Business Process: Export Diagram",
+                         "type":  "Business Process",
+                         "description":  "User workflow: one-click export to .puml file (logical structure) or .png image (rendered via PlantUML)",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-BIZ-PROC-EXPORT-1",
+                                               "description":  "Business Process: Export Diagram 鈥?one-click .puml logical export and .png rendered image",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Use File menu to export a completed diagram",
+                                               "acceptanceCriteria":  "tests/business/test_biz_process_export.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Use File menu to export a completed diagram",
+                                               "observationPoint":  "Verified via: tests/business/test_biz_process_export.mjs"
+                                           }
+                                       ]
+                     },
+                     {
+                         "id":  "mot-principle-real-env-test",
+                         "name":  "Principle: Real-environment acceptance testing",
+                         "type":  "Principle",
+                         "description":  "All acceptance tests MUST execute against the actual built Windows desktop application in a real Windows environment. Mock/simulated environments are acceptable for unit tests only.",
+                         "testcases":  [
+                                           {
+                                               "name":  "TC-PRINC-REALENV-1",
+                                               "description":  "All acceptance tests execute against real Windows desktop app, not mock/simulated",
+                                               "type":  "Acceptance Test",
+                                               "Input":  "Execute the full acceptance test suite against the built Electron application on Windows 10/11",
+                                               "acceptanceCriteria":  "tests/principles/test_principle_realenv_test.mjs",
+                                               "approvedByHuman":  true,
+                                               "controlPoint":  "Execute the full acceptance test suite against the built Electron application on Windows 10/11",
+                                               "observationPoint":  "Verified via: tests/principles/test_principle_realenv_test.mjs"
+                                           }
+                                       ]
+                     }
+                 ],
+    "relationships":  [
+                          {
+                              "id":  "rel-driver-need-goal",
+                              "statement":  "Developer need for intuitive PlantUML editing on Windows --(Influence)--\u003e Deliver PlantUML Desktop Editor",
+                              "name":  "Need drives Goal",
+                              "type":  "Influence",
+                              "source_id":  "mot-driver-need",
+                              "target_id":  "mot-goal-desktop",
+                              "source_name":  "Developer need for intuitive PlantUML editing on Windows",
+                              "target_name":  "Deliver PlantUML Desktop Editor"
+                          },
+                          {
+                              "id":  "rel-driver-zero-goal",
+                              "statement":  "Zero-configuration setup requirement --(Influence)--\u003e Deliver PlantUML Desktop Editor",
+                              "name":  "Zero-config drives Goal",
+                              "type":  "Influence",
+                              "source_id":  "mot-driver-zero",
+                              "target_id":  "mot-goal-desktop",
+                              "source_name":  "Zero-configuration setup requirement",
+                              "target_name":  "Deliver PlantUML Desktop Editor"
+                          },
+                          {
+                              "id":  "rel-assessment-goal",
+                              "statement":  "Assessment: Current web app friction --(Influence)--\u003e Deliver PlantUML Desktop Editor",
+                              "name":  "Assessment drives Goal",
+                              "type":  "Influence",
+                              "source_id":  "mot-assessment-web",
+                              "target_id":  "mot-goal-desktop",
+                              "source_name":  "Assessment: Current web app friction",
+                              "target_name":  "Deliver PlantUML Desktop Editor"
+                          },
+                          {
+                              "id":  "rel-goal-outcome",
+                              "statement":  "Deliver PlantUML Desktop Editor --(Influence)--\u003e Outcome: Developers create PlantUML diagrams via drag-and-drop on Windows",
+                              "name":  "Goal influences Outcome",
+                              "type":  "Influence",
+                              "source_id":  "mot-goal-desktop",
+                              "target_id":  "mot-outcome",
+                              "source_name":  "Deliver PlantUML Desktop Editor",
+                              "target_name":  "Outcome: Developers create PlantUML diagrams via drag-and-drop on Windows"
+                          },
+                          {
+                              "id":  "rel-principle-install-req",
+                              "statement":  "Principle: Single-click zero-config installer --(Influence)--\u003e Requirement: Drag-and-drop Activity Diagram editing",
+                              "name":  "Install principle influences Requirement",
+                              "type":  "Influence",
+                              "source_id":  "mot-principle-install",
+                              "target_id":  "mot-req-dragdrop",
+                              "source_name":  "Principle: Single-click zero-config installer",
+                              "target_name":  "Requirement: Drag-and-drop Activity Diagram editing"
+                          },
+                          {
+                              "id":  "rel-goal-coa",
+                              "statement":  "Deliver PlantUML Desktop Editor --(Association)--\u003e Work Package: Port web app to Electron desktop",
+                              "name":  "Goal associates with Work Package",
+                              "type":  "Association",
+                              "source_id":  "mot-goal-desktop",
+                              "target_id":  "strat-coa-port",
+                              "source_name":  "Deliver PlantUML Desktop Editor",
+                              "target_name":  "Work Package: Port web app to Electron desktop"
+                          },
+                          {
+                              "id":  "rel-coa-cap",
+                              "statement":  "Work Package: Port web app to Electron desktop --(Association)--\u003e Capability: Desktop PlantUML Editing",
+                              "name":  "Work Package associates with Capability",
+                              "type":  "Association",
+                              "source_id":  "strat-coa-port",
+                              "target_id":  "strat-capability",
+                              "source_name":  "Work Package: Port web app to Electron desktop",
+                              "target_name":  "Capability: Desktop PlantUML Editing"
+                          },
+                          {
+                              "id":  "rel-cap-service",
+                              "statement":  "Capability: Desktop PlantUML Editing --(Association)--\u003e Business Service: Diagram Editing Service",
+                              "name":  "Capability associates with Service",
+                              "type":  "Association",
+                              "source_id":  "strat-capability",
+                              "target_id":  "biz-service-editing",
+                              "source_name":  "Capability: Desktop PlantUML Editing",
+                              "target_name":  "Business Service: Diagram Editing Service"
+                          },
+                          {
+                              "id":  "rel-process-edit-svc",
+                              "statement":  "Business Process: Edit Diagram --(Realization)--\u003e Business Service: Diagram Editing Service",
+                              "name":  "Edit Process realizes Service",
+                              "type":  "Realization",
+                              "source_id":  "biz-process-edit",
+                              "target_id":  "biz-service-editing",
+                              "source_name":  "Business Process: Edit Diagram",
+                              "target_name":  "Business Service: Diagram Editing Service"
+                          },
+                          {
+                              "id":  "rel-process-export-svc",
+                              "statement":  "Business Process: Export Diagram --(Realization)--\u003e Business Service: Diagram Editing Service",
+                              "name":  "Export Process realizes Service",
+                              "type":  "Realization",
+                              "source_id":  "biz-process-export",
+                              "target_id":  "biz-service-editing",
+                              "source_name":  "Business Process: Export Diagram",
+                              "target_name":  "Business Service: Diagram Editing Service"
+                          },
+                          {
+                              "id":  "rel-actor-svc",
+                              "statement":  "Business Actor: Developer --(Association)--\u003e Business Service: Diagram Editing Service",
+                              "name":  "Developer associates with Service",
+                              "type":  "Association",
+                              "source_id":  "biz-actor-developer",
+                              "target_id":  "biz-service-editing",
+                              "source_name":  "Business Actor: Developer",
+                              "target_name":  "Business Service: Diagram Editing Service"
+                          },
+                          {
+                              "id":  "rel-a-b",
+                              "statement":  "Concern A: AST Data Model --(Association)--\u003e Concern B: ReactFlow Canvas Engine",
+                              "name":  "AST provides types for Canvas",
+                              "type":  "Association",
+                              "source_id":  "app-concern-a",
+                              "target_id":  "app-concern-b",
+                              "source_name":  "Concern A: AST Data Model",
+                              "target_name":  "Concern B: ReactFlow Canvas Engine"
+                          },
+                          {
+                              "id":  "rel-a-e",
+                              "statement":  "Concern A: AST Data Model --(Association)--\u003e Concern E: PlantUML Parser and Generator",
+                              "name":  "AST provides types for Parser/Generator",
+                              "type":  "Association",
+                              "source_id":  "app-concern-a",
+                              "target_id":  "app-concern-e",
+                              "source_name":  "Concern A: AST Data Model",
+                              "target_name":  "Concern E: PlantUML Parser and Generator"
+                          },
+                          {
+                              "id":  "rel-b-d",
+                              "statement":  "Concern B: ReactFlow Canvas Engine --(Association)--\u003e Concern D: Bidirectional Sync Engine",
+                              "name":  "Canvas sends events to Sync",
+                              "type":  "Association",
+                              "source_id":  "app-concern-b",
+                              "target_id":  "app-concern-d",
+                              "source_name":  "Concern B: ReactFlow Canvas Engine",
+                              "target_name":  "Concern D: Bidirectional Sync Engine"
+                          },
+                          {
+                              "id":  "rel-c-d",
+                              "statement":  "Concern C: Ace Code Editor Wrapper --(Association)--\u003e Concern D: Bidirectional Sync Engine",
+                              "name":  "Code Editor sends changes to Sync",
+                              "type":  "Association",
+                              "source_id":  "app-concern-c",
+                              "target_id":  "app-concern-d",
+                              "source_name":  "Concern C: Ace Code Editor Wrapper",
+                              "target_name":  "Concern D: Bidirectional Sync Engine"
+                          },
+                          {
+                              "id":  "rel-e-d",
+                              "statement":  "Concern E: PlantUML Parser and Generator --(Association)--\u003e Concern D: Bidirectional Sync Engine",
+                              "name":  "Parser/Generator output goes to Sync",
+                              "type":  "Association",
+                              "source_id":  "app-concern-e",
+                              "target_id":  "app-concern-d",
+                              "source_name":  "Concern E: PlantUML Parser and Generator",
+                              "target_name":  "Concern D: Bidirectional Sync Engine"
+                          },
+                          {
+                              "id":  "rel-d-c",
+                              "statement":  "Concern D: Bidirectional Sync Engine --(Association)--\u003e Concern C: Ace Code Editor Wrapper",
+                              "name":  "Sync engine updates Code Editor",
+                              "type":  "Association",
+                              "source_id":  "app-concern-d",
+                              "target_id":  "app-concern-c",
+                              "source_name":  "Concern D: Bidirectional Sync Engine",
+                              "target_name":  "Concern C: Ace Code Editor Wrapper"
+                          },
+                          {
+                              "id":  "rel-g-a",
+                              "statement":  "Concern G: Electron Desktop Shell --(Serving)--\u003e Concern A: AST Data Model",
+                              "name":  "Electron Shell serves AST",
+                              "type":  "Serving",
+                              "source_id":  "app-concern-g",
+                              "target_id":  "app-concern-a",
+                              "source_name":  "Concern G: Electron Desktop Shell",
+                              "target_name":  "Concern A: AST Data Model"
+                          },
+                          {
+                              "id":  "rel-g-b",
+                              "statement":  "Concern G: Electron Desktop Shell --(Serving)--\u003e Concern B: ReactFlow Canvas Engine",
+                              "name":  "Electron Shell serves Canvas",
+                              "type":  "Serving",
+                              "source_id":  "app-concern-g",
+                              "target_id":  "app-concern-b",
+                              "source_name":  "Concern G: Electron Desktop Shell",
+                              "target_name":  "Concern B: ReactFlow Canvas Engine"
+                          },
+                          {
+                              "id":  "rel-g-c",
+                              "statement":  "Concern G: Electron Desktop Shell --(Serving)--\u003e Concern C: Ace Code Editor Wrapper",
+                              "name":  "Electron Shell serves Code Editor",
+                              "type":  "Serving",
+                              "source_id":  "app-concern-g",
+                              "target_id":  "app-concern-c",
+                              "source_name":  "Concern G: Electron Desktop Shell",
+                              "target_name":  "Concern C: Ace Code Editor Wrapper"
+                          },
+                          {
+                              "id":  "rel-g-d",
+                              "statement":  "Concern G: Electron Desktop Shell --(Serving)--\u003e Concern D: Bidirectional Sync Engine",
+                              "name":  "Electron Shell serves Sync Engine",
+                              "type":  "Serving",
+                              "source_id":  "app-concern-g",
+                              "target_id":  "app-concern-d",
+                              "source_name":  "Concern G: Electron Desktop Shell",
+                              "target_name":  "Concern D: Bidirectional Sync Engine"
+                          },
+                          {
+                              "id":  "rel-g-e",
+                              "statement":  "Concern G: Electron Desktop Shell --(Serving)--\u003e Concern E: PlantUML Parser and Generator",
+                              "name":  "Electron Shell serves Parser/Generator",
+                              "type":  "Serving",
+                              "source_id":  "app-concern-g",
+                              "target_id":  "app-concern-e",
+                              "source_name":  "Concern G: Electron Desktop Shell",
+                              "target_name":  "Concern E: PlantUML Parser and Generator"
+                          },
+                          {
+                              "id":  "rel-g-f",
+                              "statement":  "Concern G: Electron Desktop Shell --(Serving)--\u003e Concern F: Component Palette",
+                              "name":  "Electron Shell serves Component Palette",
+                              "type":  "Serving",
+                              "source_id":  "app-concern-g",
+                              "target_id":  "app-concern-f",
+                              "source_name":  "Concern G: Electron Desktop Shell",
+                              "target_name":  "Concern F: Component Palette"
+                          },
+                          {
+                              "id":  "rel-tech-jre-backend",
+                              "statement":  "JRE (jlink minimal) --(Realization)--\u003e Python Render Backend (PyInstaller)",
+                              "name":  "JRE realizes Python Backend",
+                              "type":  "Realization",
+                              "source_id":  "tech-jre",
+                              "target_id":  "tech-python-backend",
+                              "source_name":  "JRE (jlink minimal)",
+                              "target_name":  "Python Render Backend (PyInstaller)"
+                          },
+                          {
+                              "id":  "rel-tech-plantuml-backend",
+                              "statement":  "PlantUML JAR Artifact --(Realization)--\u003e Python Render Backend (PyInstaller)",
+                              "name":  "PlantUML JAR realizes Python Backend",
+                              "type":  "Realization",
+                              "source_id":  "tech-plantuml-jar",
+                              "target_id":  "tech-python-backend",
+                              "source_name":  "PlantUML JAR Artifact",
+                              "target_name":  "Python Render Backend (PyInstaller)"
+                          },
+                          {
+                              "id":  "rel-tech-electron-g",
+                              "statement":  "Electron --(Realization)--\u003e Concern G: Electron Desktop Shell",
+                              "name":  "Electron realizes Desktop Shell",
+                              "type":  "Realization",
+                              "source_id":  "tech-electron",
+                              "target_id":  "app-concern-g",
+                              "source_name":  "Electron",
+                              "target_name":  "Concern G: Electron Desktop Shell"
+                          },
+                          {
+                              "id":  "rel-tech-py-g",
+                              "statement":  "Python Render Backend (PyInstaller) --(Serving)--\u003e Concern G: Electron Desktop Shell",
+                              "name":  "Python Render Backend serves Electron Shell",
+                              "type":  "Serving",
+                              "source_id":  "tech-python-backend",
+                              "target_id":  "app-concern-g",
+                              "source_name":  "Python Render Backend (PyInstaller)",
+                              "target_name":  "Concern G: Electron Desktop Shell"
+                          },
+                          {
+                              "id":  "rel-principle-realenv-outcome",
+                              "statement":  "Principle: Real-environment acceptance testing --(Influence)--\u003e Outcome: Developers create PlantUML diagrams via drag-and-drop on Windows",
+                              "name":  "Real-environment test principle influences Outcome",
+                              "type":  "Influence",
+                              "source_id":  "mot-principle-real-env-test",
+                              "target_id":  "mot-outcome",
+                              "source_name":  "Principle: Real-environment acceptance testing",
+                              "target_name":  "Outcome: Developers create PlantUML diagrams via drag-and-drop on Windows"
+                          }
+                      ],
+    "views":  [
+                  {
+                      "view_id":  "view-root",
+                      "view_name":  "SystemArchitecture",
+                      "description":  "Top-level architecture view",
+                      "included_elements":  [
+                                                "ele-root"
+                                            ],
+                      "included_relationships":  [
+
+                                                 ]
+                  },
+                  {
+                      "view_id":  "view-motivation",
+                      "view_name":  "Motivation Layer",
+                      "description":  "Goals, drivers, assessments, principles driving the PlantUML Desktop Editor",
+                      "parent_element_id":  "ele-root",
+                      "parent_element_name":  "SystemArchitecture",
+                      "included_elements":  [
+                                                "mot-goal-desktop",
+                                                "mot-driver-need",
+                                                "mot-driver-zero",
+                                                "mot-assessment-web",
+                                                "mot-principle-install",
+                                                "mot-principle-freeform",
+                                                "mot-principle-sync"
+                                            ],
+                      "included_relationships":  [
+                                                     "rel-driver-need-goal",
+                                                     "rel-driver-zero-goal",
+                                                     "rel-assessment-goal"
+                                                 ]
+                  },
+                  {
+                      "view_id":  "view-requirements",
+                      "view_name":  "Requirements and Constraints",
+                      "description":  "Functional requirements, constraints, and expected outcomes",
+                      "parent_element_id":  "ele-root",
+                      "parent_element_name":  "SystemArchitecture",
+                      "included_elements":  [
+
+                                            ],
+                      "included_relationships":  [
+
+                                                 ]
+                  },
+                  {
+                      "view_id":  "view-strategy",
+                      "view_name":  "Strategy and Business",
+                      "description":  "Strategic direction and business layer elements",
+                      "parent_element_id":  "ele-root",
+                      "parent_element_name":  "SystemArchitecture",
+                      "included_elements":  [
+                                                "strat-coa-port",
+                                                "strat-capability",
+                                                "biz-service-editing",
+                                                "biz-actor-developer",
+                                                "biz-process-edit",
+                                                "biz-process-export",
+                                                "mot-goal-desktop"
+                                            ],
+                      "included_relationships":  [
+                                                     "rel-goal-coa",
+                                                     "rel-coa-cap",
+                                                     "rel-cap-service",
+                                                     "rel-process-edit-svc",
+                                                     "rel-process-export-svc",
+                                                     "rel-actor-svc"
+                                                 ]
+                  },
+                  {
+                      "view_id":  "view-application",
+                      "view_name":  "Application Layer - Horizontal Concerns",
+                      "description":  "Seven orthogonal application concerns",
+                      "parent_element_id":  "ele-root",
+                      "parent_element_name":  "SystemArchitecture",
+                      "included_elements":  [
+                                                "app-concern-a",
+                                                "app-concern-b",
+                                                "app-concern-c",
+                                                "app-concern-d",
+                                                "app-concern-e",
+                                                "app-concern-f",
+                                                "app-concern-g"
+                                            ],
+                      "included_relationships":  [
+                                                     "rel-a-b",
+                                                     "rel-a-e",
+                                                     "rel-b-d",
+                                                     "rel-c-d",
+                                                     "rel-e-d",
+                                                     "rel-d-c",
+                                                     "rel-g-a",
+                                                     "rel-g-b",
+                                                     "rel-g-c",
+                                                     "rel-g-d",
+                                                     "rel-g-e",
+                                                     "rel-g-f"
+                                                 ]
+                  },
+                  {
+                      "view_id":  "view-technology",
+                      "view_name":  "Technology Stack",
+                      "description":  "Technology components and infrastructure",
+                      "parent_element_id":  "ele-root",
+                      "parent_element_name":  "SystemArchitecture",
+                      "included_elements":  [
+                                                "tech-jre",
+                                                "tech-python-backend",
+                                                "tech-plantuml-jar"
+                                            ],
+                      "included_relationships":  [
+                                                     "rel-tech-jre-backend",
+                                                     "rel-tech-plantuml-backend"
+                                                 ]
+                  },
+                  {
+                      "view_id":  "view-dependencies",
+                      "view_name":  "Vertical Dependencies",
+                      "description":  "Prerequisite and dependency relationships between architecture elements",
+                      "parent_element_id":  "ele-root",
+                      "parent_element_name":  "SystemArchitecture",
+                      "included_elements":  [
+                                                "app-concern-g",
+                                                "tech-electron",
+                                                "tech-python-backend"
+                                            ],
+                      "included_relationships":  [
+                                                     "rel-tech-electron-g",
+                                                     "rel-tech-py-g"
+                                                 ]
+                  },
+                  {
+                      "view_id":  "view-functional-reqs",
+                      "view_name":  "Functional Requirements",
+                      "description":  "Functional requirements for the PlantUML Desktop Editor",
+                      "parent_element_id":  "ele-root",
+                      "parent_element_name":  "SystemArchitecture",
+                      "included_elements":  [
+                                                "mot-req-dragdrop",
+                                                "mot-req-export",
+                                                "mot-req-import",
+                                                "mot-req-sync",
+                                                "mot-principle-install"
+                                            ],
+                      "included_relationships":  [
+                                                     "rel-principle-install-req"
+                                                 ]
+                  },
+                  {
+                      "view_id":  "view-constraints",
+                      "view_name":  "Constraints and Outcome",
+                      "description":  "Technical constraints and expected outcomes",
+                      "parent_element_id":  "ele-root",
+                      "parent_element_name":  "SystemArchitecture",
+                      "included_elements":  [
+                                                "mot-constraint-electron",
+                                                "mot-constraint-windows",
+                                                "mot-constraint-python-backend",
+                                                "mot-outcome",
+                                                "mot-goal-desktop",
+                                                "mot-principle-real-env-test"
+                                            ],
+                      "included_relationships":  [
+                                                     "rel-goal-outcome",
+                                                     "rel-principle-realenv-outcome"
+                                                 ]
+                  },
+                  {
+                      "view_id":  "view-tech-framework",
+                      "view_name":  "Technology - Framework",
+                      "description":  "Framework and library technology components",
+                      "parent_element_id":  "ele-root",
+                      "parent_element_name":  "SystemArchitecture",
+                      "included_elements":  [
+                                                "tech-electron",
+                                                "tech-react-ts",
+                                                "tech-nodejs",
+                                                "tech-reactflow",
+                                                "tech-ace"
+                                            ],
+                      "included_relationships":  [
+
+                                                 ]
+                  },
+                  {
+                      "view_id":  "view-tech-deployment",
+                      "view_name":  "Technology - Deployment",
+                      "description":  "Deployment and infrastructure technology components",
+                      "parent_element_id":  "ele-root",
+                      "parent_element_name":  "SystemArchitecture",
+                      "included_elements":  [
+                                                "tech-windows-pc",
+                                                "tech-installer",
+                                                "tech-plantuml-jar"
+                                            ],
+                      "included_relationships":  [
+
+                                                 ]
+                  },
+                  {
+                      "view_id":  "view-test-quality",
+                      "view_name":  "Testing and Quality",
+                      "description":  "Testing principles and quality constraints for the PlantUML Desktop Editor",
+                      "parent_element_id":  "ele-root",
+                      "parent_element_name":  "SystemArchitecture",
+                      "included_elements":  [
+                                                "mot-principle-real-env-test",
+                                                "mot-outcome"
+                                            ],
+                      "included_relationships":  [
+                                                     "rel-principle-realenv-outcome"
+                                                 ]
+                  }
+              ]
+}

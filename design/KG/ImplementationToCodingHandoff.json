@@ -1,0 +1,703 @@
+{
+  "stage": "implementation-to-coding",
+  "generatedAt": "2026-06-25T16:00:00Z",
+  "sourceIntentGraphPath": "design/KG/SystemArchitecture.json",
+  "summary": "Implementation Design handoff for Business Service: Diagram Editing Service (biz-service-editing). The coding stage must produce a new Electron + React + TypeScript + Vite desktop application with 7 orthogonal concerns (A–G). The existing Python Flask web app (src/plantuml_gui/) must be retained but stripped to only /render and /renderPNG endpoints. All new Electron/React code lives under new src/ directories. Acceptance tests are physicalized as Playwright E2E and Vitest unit test files. All testfiles are expected to fail initially (code does not exist yet). The Python backend's existing activity/sequence manipulation endpoints are removed; TypeScript AST handles all parsing, generation, and editing logic.",
+
+  "implementationContracts": [
+    "OVERALL_ARCHITECTURE.md",
+    "src/model/ARCHITECTURE.md",
+    "src/parser/ARCHITECTURE.md",
+    "src/generator/ARCHITECTURE.md",
+    "src/canvas/ARCHITECTURE.md",
+    "src/editor/ARCHITECTURE.md",
+    "src/sync/ARCHITECTURE.md",
+    "src/palette/ARCHITECTURE.md",
+    "src/main/ARCHITECTURE.md",
+    "src/renderer/ARCHITECTURE.md",
+    "src/python-backend/ARCHITECTURE.md"
+  ],
+
+  "explicitEntrypoints": [
+    {
+      "testcaseName": "TC-AST-1",
+      "entryPath": "tests/model/test_ast_types.mjs",
+      "controlPoint": "TypeScript compilation of src/model/types.ts via npx tsc --noEmit",
+      "observationPoint": "Exit code 0 with no type errors. All node types compile: ActivityNode, IfNode, WhileNode, ForkNode, SwitchNode, ContainerNode, DiagramModel, EdgeData.",
+      "initialExecutionStatus": "failed",
+      "initialExecutionCommand": "node tests/model/test_ast_types.mjs",
+      "failureReason": "Test script does not exist yet. src/model/types.ts has not been implemented. Coding stage must create the AST type definitions and the test script."
+    },
+    {
+      "testcaseName": "TC-AST-2",
+      "entryPath": "tests/model/test_ast_serialization.mjs",
+      "controlPoint": "Create DiagramModel, serialize to JSON, deserialize, assert round-trip equality",
+      "observationPoint": "Exit code 0. Round-trip preserves all node types, positions, container hierarchy, and edge connections.",
+      "initialExecutionStatus": "failed",
+      "initialExecutionCommand": "node tests/model/test_ast_serialization.mjs",
+      "failureReason": "Test script does not exist yet. src/model/serialization.ts has not been implemented. Coding stage must create serialization logic and the test script."
+    },
+    {
+      "testcaseName": "TC-B-1",
+      "entryPath": "tests/e2e/test_canvas_node_types.mjs",
+      "controlPoint": "Launch Electron app, initialize ReactFlow with DiagramModel containing one node of each type",
+      "observationPoint": "Each node type renders with correct visual shape and label at assigned x,y coordinates. Screenshot comparison.",
+      "initialExecutionStatus": "failed",
+      "initialExecutionCommand": "node tests/e2e/test_canvas_node_types.mjs",
+      "failureReason": "Test script does not exist yet. src/canvas/Canvas.tsx and custom node renderers have not been implemented. Coding stage must create Canvas engine and E2E test script."
+    },
+    {
+      "testcaseName": "TC-B-2",
+      "entryPath": "tests/e2e/test_canvas_dragdrop_levels.mjs",
+      "controlPoint": "Perform three drag-and-drop operations: palette→canvas, reposition, connector handle",
+      "observationPoint": "Level A: new node at drop coordinates. Level B: node moves. Level C: directed edge created.",
+      "initialExecutionStatus": "failed",
+      "initialExecutionCommand": "node tests/e2e/test_canvas_dragdrop_levels.mjs",
+      "failureReason": "Test script does not exist yet. Canvas drag-and-drop handlers have not been implemented. Coding stage must create useDragDrop hook and E2E test script."
+    },
+    {
+      "testcaseName": "TC-C-1",
+      "entryPath": "tests/e2e/test_editor_syntax_highlighting.mjs",
+      "controlPoint": "Load .puml file into Ace Editor wrapper",
+      "observationPoint": "PlantUML keywords highlighted, line numbers visible, editor read/write.",
+      "initialExecutionStatus": "failed",
+      "initialExecutionCommand": "node tests/e2e/test_editor_syntax_highlighting.mjs",
+      "failureReason": "Test script does not exist yet. src/editor/AceEditorWrapper.tsx and PlantUML mode have not been implemented."
+    },
+    {
+      "testcaseName": "TC-C-2",
+      "entryPath": "tests/e2e/test_editor_debounce_events.mjs",
+      "controlPoint": "Type in Ace Editor rapidly; observe event emission timing",
+      "observationPoint": "Events fire at most once per 200ms window. Each event contains full updated text content.",
+      "initialExecutionStatus": "failed",
+      "initialExecutionCommand": "node tests/e2e/test_editor_debounce_events.mjs",
+      "failureReason": "Test script does not exist yet. useEditorEvents hook with 200ms debounce has not been implemented."
+    },
+    {
+      "testcaseName": "TC-D-1",
+      "entryPath": "tests/e2e/test_sync_last_write_wins.mjs",
+      "controlPoint": "Make canvas edit, then within 200ms make code edit. Wait for sync convergence.",
+      "observationPoint": "Later edit (by timestamp) preserved. Earlier edit overwritten. Canvas and code converge to same state.",
+      "initialExecutionStatus": "failed",
+      "initialExecutionCommand": "node tests/e2e/test_sync_last_write_wins.mjs",
+      "failureReason": "Test script does not exist yet. SyncEngine with last-write-wins and timestamp comparison has not been implemented."
+    },
+    {
+      "testcaseName": "TC-D-2",
+      "entryPath": "tests/e2e/test_sync_fingerprint_preservation.mjs",
+      "controlPoint": "Edit diagram, export .puml, re-import .puml",
+      "observationPoint": "Elements with matching fingerprints retain previous positions. New/changed elements get default grid placement.",
+      "initialExecutionStatus": "failed",
+      "initialExecutionCommand": "node tests/e2e/test_sync_fingerprint_preservation.mjs",
+      "failureReason": "Test script does not exist yet. FingerprintMatcher and SidecarStore for .puml.meta have not been implemented."
+    },
+    {
+      "testcaseName": "TC-E-1",
+      "entryPath": "tests/parser/test_parser_activity_diagram.mjs",
+      "controlPoint": "Parse Activity Diagram PlantUML text with if/while/fork containers",
+      "observationPoint": "AST contains correct node types with proper ContainerNode nesting. Stack-based tracking produces correct hierarchy.",
+      "initialExecutionStatus": "failed",
+      "initialExecutionCommand": "node tests/parser/test_parser_activity_diagram.mjs",
+      "failureReason": "Test script does not exist yet. src/parser/parser.ts with stack-based nesting tracking has not been implemented."
+    },
+    {
+      "testcaseName": "TC-E-2",
+      "entryPath": "tests/generator/test_generator_roundtrip.mjs",
+      "controlPoint": "Take parsed AST, generate PlantUML text, re-parse generated text",
+      "observationPoint": "Round-trip preserves all element types, nesting structure, and ordering. Re-import succeeds without syntax errors.",
+      "initialExecutionStatus": "failed",
+      "initialExecutionCommand": "node tests/generator/test_generator_roundtrip.mjs",
+      "failureReason": "Test script does not exist yet. src/generator/generator.ts with depth-tracked indentation has not been implemented."
+    },
+    {
+      "testcaseName": "TC-F-1",
+      "entryPath": "tests/e2e/test_palette_categories.mjs",
+      "controlPoint": "Open the application; inspect the left-panel palette",
+      "observationPoint": "Three categories visible with collapsible headers: Flow (Activity, Start, Stop, Connector), Structure (If, While, Fork, Switch), Decoration (Note, Group, Title). Drag preview on hover.",
+      "initialExecutionStatus": "failed",
+      "initialExecutionCommand": "node tests/e2e/test_palette_categories.mjs",
+      "failureReason": "Test script does not exist yet. src/palette/Palette.tsx with 3 collapsible categories has not been implemented."
+    },
+    {
+      "testcaseName": "TC-F-2",
+      "entryPath": "tests/e2e/test_palette_drag_to_canvas.mjs",
+      "controlPoint": "Drag 'Activity' from palette to canvas at position (200, 300)",
+      "observationPoint": "New ActivityNode created at x=200, y=300. Canvas updates. Code editor reflects new activity line.",
+      "initialExecutionStatus": "failed",
+      "initialExecutionCommand": "node tests/e2e/test_palette_drag_to_canvas.mjs",
+      "failureReason": "Test script does not exist yet. Palette-to-canvas drag integration has not been implemented."
+    },
+    {
+      "testcaseName": "TC-G-1",
+      "entryPath": "tests/e2e/test_electron_native_menus.mjs",
+      "controlPoint": "Click each menu item in the application window",
+      "observationPoint": "File→Open opens file dialog for .puml. File→Export .puml saves. File→Export .png triggers render+save. File→Exit closes app. Edit undo/redo works on canvas.",
+      "initialExecutionStatus": "failed",
+      "initialExecutionCommand": "node tests/e2e/test_electron_native_menus.mjs",
+      "failureReason": "Test script does not exist yet. Electron native menus and IPC handlers have not been implemented."
+    },
+    {
+      "testcaseName": "TC-G-2",
+      "entryPath": "tests/e2e/test_electron_python_subprocess.mjs",
+      "controlPoint": "Trigger first .png export; close application",
+      "observationPoint": "Python backend exe spawns on first export. /health responds within 5s. On close, SIGTERM sent; process exits within 3s.",
+      "initialExecutionStatus": "failed",
+      "initialExecutionCommand": "node tests/e2e/test_electron_python_subprocess.mjs",
+      "failureReason": "Test script does not exist yet. Python backend subprocess manager has not been implemented."
+    },
+    {
+      "testcaseName": "TC-BIZ-SVC-1",
+      "entryPath": "tests/e2e/test_biz_service_end_to_end.mjs",
+      "controlPoint": "Complete end-to-end workflow: create, edit, export diagram",
+      "observationPoint": "User can start new diagram, add elements from palette, arrange on canvas, connect, see real-time code preview, export as .puml and .png.",
+      "initialExecutionStatus": "failed",
+      "initialExecutionCommand": "node tests/e2e/test_biz_service_end_to_end.mjs",
+      "failureReason": "Test script does not exist yet. Full application integration has not been implemented."
+    }
+  ],
+
+  "criticalNonExplicitTests": [
+    {
+      "name": "Architecture Boundary Guard: Dependency Direction",
+      "path": "tests/arch/test_dependency_direction.mjs",
+      "kind": "ArchitectureBoundaryGuard",
+      "controlPoint": "Static analysis of import/require statements between modules",
+      "observationPoint": "All dependencies respect declared directions: G→{A,B,C,D,E,F}, A→{B,E}, {B,C,E}→D, D→C. No reverse or lateral dependencies.",
+      "expectedStatus": "failed"
+    },
+    {
+      "name": "Architecture Boundary Guard: Python Backend Endpoint Constraint",
+      "path": "tests/arch/test_python_backend_endpoints.mjs",
+      "kind": "ArchitectureBoundaryGuard",
+      "controlPoint": "Inspect Python backend routes after stripping",
+      "observationPoint": "Only /render and /renderPNG endpoints exist. All ~40 manipulation endpoints removed. TypeScript AST handles parsing/generation.",
+      "expectedStatus": "failed"
+    },
+    {
+      "name": "Explicit Entrypoint Correctness Guard: TS Strict Mode",
+      "path": "tests/arch/test_ts_strict_mode.mjs",
+      "kind": "ExplicitEntrypointCorrectnessGuard",
+      "controlPoint": "Check tsconfig.json for strict mode setting",
+      "observationPoint": "strict: true in tsconfig.json. All exports are typed. No implicit any.",
+      "expectedStatus": "failed"
+    },
+    {
+      "name": "Key Implementation Traceability Guard: Implements Mappings",
+      "path": "tests/arch/test_implements_mappings.mjs",
+      "kind": "KeyImplementationTraceabilityGuard",
+      "controlPoint": "Verify each architecture concern maps to at least one source module with documented responsibility",
+      "observationPoint": "Each of 7 concerns has a corresponding ARCHITECTURE.md and at least one .ts file with header comment referencing the concern ID.",
+      "expectedStatus": "failed"
+    }
+  ],
+
+  "supportingNonExplicitTests": [
+    {
+      "name": "No Inline Styles Guard",
+      "path": "tests/arch/test_no_inline_styles.mjs",
+      "kind": "guardrail",
+      "controlPoint": "Grep for style={{ in .tsx files",
+      "observationPoint": "No React inline style definitions. CSS modules or styled-components used instead.",
+      "expectedStatus": "failed"
+    },
+    {
+      "name": "Architecture Test Runner Integration",
+      "path": "tests/arch/test_architecture_runner_integration.mjs",
+      "kind": "guardrail",
+      "controlPoint": "Verify argo_runArchitectureTests can discover and execute all acceptance test entrypoints",
+      "observationPoint": "All explicit entrypoint scripts discoverable and executable by runArchitectureTests.js",
+      "expectedStatus": "failed"
+    }
+  ],
+
+  "expectedFailureRecordsPath": "design/KG/test-failure-records.json",
+
+  "codingTargets": [
+    {
+      "testcaseName": "TC-AST-1",
+      "path": "src/model/types.ts",
+      "failureSignal": "Exit code non-zero or type compilation errors for AST types",
+      "nextAction": "Define all AST types (ActivityNode, IfNode, WhileNode, ForkNode, SwitchNode, ContainerNode, DiagramModel, EdgeData) with strict TypeScript. Ensure ContainerNode has children array. DiagramModel has nodes[] and edges[]. EdgeData references source/target node ids."
+    },
+    {
+      "testcaseName": "TC-AST-2",
+      "path": "src/model/serialization.ts",
+      "failureSignal": "Round-trip test fails: serialization produces different output than input",
+      "nextAction": "Implement toJSON/fromJSON on DiagramModel. Ensure all node types serialize/deserialize correctly with positions, hierarchy, and edges."
+    },
+    {
+      "testcaseName": "TC-E-1",
+      "path": "src/parser/parser.ts",
+      "failureSignal": "Parsed AST does not match expected structure for sample Activity Diagram PlantUML",
+      "nextAction": "Implement stack-based nesting tracking. Support @startuml/@enduml, :Action;, if/else/endif, while/endwhile, fork/endfork, split/endsplit. Use forward/backward scanning for block boundaries."
+    },
+    {
+      "testcaseName": "TC-E-2",
+      "path": "src/generator/generator.ts",
+      "failureSignal": "Round-trip parse→generate→parse does not preserve all elements",
+      "nextAction": "Implement depth-tracked indentation. Generate valid PlantUML for all AST node types. Ensure re-import of generated text produces identical AST."
+    },
+    {
+      "testcaseName": "TC-B-1",
+      "path": "src/canvas/Canvas.tsx",
+      "failureSignal": "Custom node types do not render or are positioned incorrectly",
+      "nextAction": "Create ReactFlow custom node renderers for each node type (StartNode, StopNode, ActivityNode, IfNode, WhileNode, ForkNode, SwitchNode). Use ReactFlow's position property for placement."
+    },
+    {
+      "testcaseName": "TC-B-2",
+      "path": "src/canvas/hooks/useDragDrop.ts",
+      "failureSignal": "One or more drag-and-drop levels do not work",
+      "nextAction": "Implement onDrop handler for palette→canvas (new node at drop coords). Implement onNodeDragStop for reposition. Implement connect handler for connector handle→edge creation."
+    },
+    {
+      "testcaseName": "TC-C-1",
+      "path": "src/editor/AceEditorWrapper.tsx",
+      "failureSignal": "PlantUML keywords not highlighted or editor not functional",
+      "nextAction": "Wrap react-ace with PlantUML mode definition. Use mode-plantuml.js or define Ace mode inline. Ensure line numbers visible and editor is read/write."
+    },
+    {
+      "testcaseName": "TC-C-2",
+      "path": "src/editor/useEditorEvents.ts",
+      "failureSignal": "Debounce does not fire or fires too frequently",
+      "nextAction": "Implement useEditorEvents hook with 200ms debounce. Emit full text content on each event. Use lodash.debounce or custom debounce."
+    },
+    {
+      "testcaseName": "TC-D-1",
+      "path": "src/sync/SyncEngine.ts",
+      "failureSignal": "Last-write-wins does not preserve the later edit",
+      "nextAction": "Implement SyncEngine with version numbers and timestamps. On sync trigger, compare timestamps. Later edit overwrites earlier. Regenerate the other representation."
+    },
+    {
+      "testcaseName": "TC-D-2",
+      "path": "src/sync/FingerprintMatcher.ts",
+      "failureSignal": "Re-import loses element positions",
+      "nextAction": "Implement fingerprint matching. Compute fingerprint from element type + label + nesting path. Persist positions in .puml.meta sidecar. Restore positions on re-import. Default grid layout for unmatchable elements."
+    },
+    {
+      "testcaseName": "TC-F-1",
+      "path": "src/palette/Palette.tsx",
+      "failureSignal": "Palette categories not displayed or items not draggable",
+      "nextAction": "Implement left-panel Palette with 3 collapsible category sections. Each section contains draggable items. Implement drag preview on hover."
+    },
+    {
+      "testcaseName": "TC-F-2",
+      "path": "src/palette/DragController.ts",
+      "failureSignal": "Dragged item does not create correct element type at drop position",
+      "nextAction": "Implement HTML5 drag-and-drop from palette items to ReactFlow canvas. On drop, create new node of correct type at drop coordinates. Trigger sync to update code editor."
+    },
+    {
+      "testcaseName": "TC-G-1",
+      "path": "src/main/menu.ts",
+      "failureSignal": "Native menus missing or non-functional",
+      "nextAction": "Implement Electron native menu with File (Open, Export .puml, Export .png, Exit), Edit (Undo, Redo), Help (About). Wire menu actions to IPC handlers."
+    },
+    {
+      "testcaseName": "TC-G-2",
+      "path": "src/main/pythonBackend.ts",
+      "failureSignal": "Python backend subprocess not spawned or not cleaned up",
+      "nextAction": "Implement Python backend subprocess manager. Spawn PyInstaller exe (or python dev script) on first export trigger. Health-check via /health. Graceful shutdown via SIGTERM on app close."
+    },
+    {
+      "testcaseName": "TC-BIZ-SVC-1",
+      "path": "src/renderer/App.tsx",
+      "failureSignal": "End-to-end workflow breaks at any step",
+      "nextAction": "Integrate all concerns in App.tsx: Palette on left, Canvas center, Code Editor on right. Wire sync engine. Wire menu actions. Ensure full workflow: add→arrange→connect→sync→export."
+    }
+  ],
+
+  "taskExecutionPlan": {
+    "executionStrategy": "Dependency-driven incremental build. Foundation concerns (A, E) first, then infrastructure (G), then UI concerns (B, C, F), then integration (D). Finally Python backend stripping and installer setup. Each task produces compilable/runnable output before moving to the next. Tasks with dependsOn wait for completion signals from predecessors.",
+    "tasks": [
+      {
+        "taskId": "TASK-01",
+        "title": "Project Scaffolding: Electron + React + TypeScript + Vite",
+        "objective": "Initialize the new Electron desktop project with all build tooling, configuration files, and project structure.",
+        "dependsOn": [],
+        "relatedTestcases": ["TC-CONST-ELECTRON-1"],
+        "targetPaths": [
+          "package.json",
+          "tsconfig.json",
+          "vite.config.ts",
+          "electron-builder.yml",
+          "src/main/",
+          "src/preload/",
+          "src/renderer/",
+          "index.html"
+        ],
+        "steps": [
+          "Initialize npm project with package.json including Electron, React, Vite, TypeScript dependencies",
+          "Create vite.config.ts with Electron renderer configuration",
+          "Create tsconfig.json with strict mode enabled",
+          "Create electron-builder.yml configuration targeting Windows NSIS",
+          "Create src/main/main.ts with basic Electron BrowserWindow",
+          "Create src/preload/preload.ts with context bridge",
+          "Create src/renderer/index.html and src/renderer/main.tsx with React root",
+          "Create .gitkeep files for all module directories: src/model/, src/canvas/, src/editor/, src/sync/, src/parser/, src/generator/, src/palette/"
+        ],
+        "completionSignal": "`npm run dev` launches Electron window showing empty React app."
+      },
+      {
+        "taskId": "TASK-02",
+        "title": "Concern A: AST Data Model",
+        "objective": "Define all TypeScript types for PlantUML activity diagram elements. Foundation for all other concerns.",
+        "dependsOn": ["TASK-01"],
+        "relatedTestcases": ["TC-AST-1", "TC-AST-2"],
+        "targetPaths": [
+          "src/model/types.ts",
+          "src/model/serialization.ts",
+          "src/model/index.ts"
+        ],
+        "steps": [
+          "Define ActivityNode: { id, type: 'activity', label, position, width, height }",
+          "Define IfNode: { id, type: 'if', condition, thenBranch: ContainerNode, elseBranch: ContainerNode, position, width, height }",
+          "Define WhileNode: { id, type: 'while', condition, body: ContainerNode, position, width, height }",
+          "Define ForkNode: { id, type: 'fork', branches: ContainerNode[], position, width, height }",
+          "Define SwitchNode: { id, type: 'switch', expression, cases: { label, body: ContainerNode }[], position, width, height }",
+          "Define ContainerNode: { id, type: 'container', children: DiagramNode[], position, width, height, collapsed: boolean }",
+          "Define EdgeData: { id, source, target, label? }",
+          "Define DiagramModel: { nodes: DiagramNode[], edges: EdgeData[] }",
+          "Implement toJSON/fromJSON serialization supporting round-trip preservation",
+          "Create src/model/index.ts barrel export"
+        ],
+        "completionSignal": "TC-AST-1 and TC-AST-2 both pass (exit code 0)."
+      },
+      {
+        "taskId": "TASK-03",
+        "title": "Concern E: PlantUML Parser",
+        "objective": "Parse PlantUML Activity Diagram text into AST using stack-based nesting tracking with tolerance for unsupported elements.",
+        "dependsOn": ["TASK-02"],
+        "relatedTestcases": ["TC-E-1"],
+        "targetPaths": [
+          "src/parser/parser.ts",
+          "src/parser/tokenizer.ts",
+          "src/parser/index.ts"
+        ],
+        "steps": [
+          "Implement tokenizer: split PlantUML text into tokens (keywords, identifiers, braces, colons)",
+          "Implement stack-based nesting tracker for if/while/fork/endif/endwhile/endfork/split/endsplit",
+          "Implement forward/backward scanning for block boundary detection",
+          "Map tokens to AST node types using Concern A types",
+          "Handle @startuml/@enduml wrapper",
+          "Handle :Activity; actions",
+          "Handle if/else/endif with branch containers",
+          "Handle while/endwhile with body container",
+          "Handle fork/endfork with branch containers",
+          "Handle split/endsplit with branch containers",
+          "Handle unsupported elements as grey read-only blocks (CommentNode or UnsupportedNode)",
+          "Create src/parser/index.ts barrel export"
+        ],
+        "completionSignal": "TC-E-1 passes: sample Activity Diagram parses to correct AST."
+      },
+      {
+        "taskId": "TASK-04",
+        "title": "Concern E: PlantUML Generator",
+        "objective": "Generate valid PlantUML text from AST with depth-tracked indentation and round-trip fidelity.",
+        "dependsOn": ["TASK-02", "TASK-03"],
+        "relatedTestcases": ["TC-E-2"],
+        "targetPaths": [
+          "src/generator/generator.ts",
+          "src/generator/indentation.ts",
+          "src/generator/index.ts"
+        ],
+        "steps": [
+          "Implement depth-tracked indentation (2 spaces per nesting level)",
+          "Handle each AST node type and emit corresponding PlantUML syntax",
+          "Handle container nesting: containers emit their children with increased indentation",
+          "Ensure generated text starts with @startuml and ends with @enduml",
+          "Verify round-trip: parse(generate(ast)) === ast for all node types",
+          "Create src/generator/index.ts barrel export"
+        ],
+        "completionSignal": "TC-E-2 passes: round-trip preserves all element types, nesting, and ordering."
+      },
+      {
+        "taskId": "TASK-05",
+        "title": "Concern G: Electron Desktop Shell — Core",
+        "objective": "Implement Electron main process with window management, native menus, and file dialogs.",
+        "dependsOn": ["TASK-01"],
+        "relatedTestcases": ["TC-G-1"],
+        "targetPaths": [
+          "src/main/main.ts",
+          "src/main/menu.ts",
+          "src/main/ipcHandlers.ts",
+          "src/main/window.ts",
+          "src/preload/preload.ts"
+        ],
+        "steps": [
+          "Expand src/main/main.ts with window creation, menu setup, and IPC registration",
+          "Implement native menu: File (Open, Export .puml, Export .png, Exit), Edit (Undo, Redo), Help (About)",
+          "Implement IPC handlers for file dialog (open .puml, save .puml, save .png)",
+          "Implement preload.ts with contextBridge exposing file operations and app events",
+          "Wire About dialog with version info",
+          "Implement keyboard shortcuts (Ctrl+O, Ctrl+S, Ctrl+Z, Ctrl+Shift+Z)"
+        ],
+        "completionSignal": "TC-G-1 passes: all native menu items work correctly."
+      },
+      {
+        "taskId": "TASK-06",
+        "title": "Concern B: ReactFlow Canvas Engine",
+        "objective": "Implement free-form ReactFlow canvas with custom node renderers and drag-and-drop handlers.",
+        "dependsOn": ["TASK-02", "TASK-05"],
+        "relatedTestcases": ["TC-B-1", "TC-B-2"],
+        "targetPaths": [
+          "src/canvas/Canvas.tsx",
+          "src/canvas/nodes/",
+          "src/canvas/hooks/useDragDrop.ts",
+          "src/canvas/hooks/useCanvasSync.ts",
+          "src/canvas/index.ts"
+        ],
+        "steps": [
+          "Create Canvas.tsx wrapping ReactFlow with custom node types",
+          "Create custom node renderers: StartNode, StopNode, ActivityNode (rounded rect), IfNode (diamond), WhileNode, ForkNode, SwitchNode",
+          "Implement onDrop handler for palette→canvas (Level A)",
+          "Implement onNodeDragStop for free repositioning (Level B)",
+          "Implement connect handler for connector handle→edge creation (Level C)",
+          "Implement container nesting visualization (ContainerNode renders children inside)",
+          "Wire canvas events to sync engine interface (onNodesChange, onEdgesChange)",
+          "Create src/canvas/index.ts barrel export"
+        ],
+        "completionSignal": "TC-B-1 and TC-B-2 both pass."
+      },
+      {
+        "taskId": "TASK-07",
+        "title": "Concern C: Ace Code Editor Wrapper",
+        "objective": "Wrap Ace Editor with PlantUML syntax highlighting, line markers, and debounced change events.",
+        "dependsOn": ["TASK-01"],
+        "relatedTestcases": ["TC-C-1", "TC-C-2"],
+        "targetPaths": [
+          "src/editor/AceEditorWrapper.tsx",
+          "src/editor/useEditorEvents.ts",
+          "src/editor/plantumlMode.ts",
+          "src/editor/index.ts"
+        ],
+        "steps": [
+          "Install react-ace and ace-builds packages",
+          "Create AceEditorWrapper React component with configurable readOnly, value, and onChange",
+          "Define PlantUML syntax highlighting mode (keywords, comments, strings, operators)",
+          "Implement useEditorEvents hook with 200ms debounce on content changes",
+          "Implement line marker API for canvas-code correspondence (markers from sync engine)",
+          "Wire onChange to sync engine interface",
+          "Create src/editor/index.ts barrel export"
+        ],
+        "completionSignal": "TC-C-1 and TC-C-2 both pass."
+      },
+      {
+        "taskId": "TASK-08",
+        "title": "Concern F: Component Palette",
+        "objective": "Implement left-panel draggable element palette with three categories and drag preview.",
+        "dependsOn": ["TASK-06"],
+        "relatedTestcases": ["TC-F-1", "TC-F-2"],
+        "targetPaths": [
+          "src/palette/Palette.tsx",
+          "src/palette/PaletteCategory.tsx",
+          "src/palette/DragController.ts",
+          "src/palette/paletteItems.ts",
+          "src/palette/index.ts"
+        ],
+        "steps": [
+          "Define palette items: Flow (Activity, Start, Stop, Connector), Structure (If, While, Fork, Switch), Decoration (Note, Group, Title)",
+          "Create Palette.tsx with 3 collapsible category sections and horizontal scroll for items",
+          "Implement HTML5 dragstart on each palette item with drag preview",
+          "Implement DragController coordinating drag events between palette and canvas",
+          "Create src/palette/index.ts barrel export"
+        ],
+        "completionSignal": "TC-F-1 and TC-F-2 both pass."
+      },
+      {
+        "taskId": "TASK-09",
+        "title": "Concern D: Bidirectional Sync Engine",
+        "objective": "Implement canvas↔code synchronization with last-write-wins conflict resolution and fingerprint matching.",
+        "dependsOn": ["TASK-03", "TASK-04", "TASK-06", "TASK-07"],
+        "relatedTestcases": ["TC-D-1", "TC-D-2"],
+        "targetPaths": [
+          "src/sync/SyncEngine.ts",
+          "src/sync/FingerprintMatcher.ts",
+          "src/sync/ConflictResolver.ts",
+          "src/sync/SidecarStore.ts",
+          "src/sync/index.ts"
+        ],
+        "steps": [
+          "Implement SyncEngine class with subscribe/notify pattern for canvas and editor events",
+          "Implement version counter and timestamp tracking for last-write-wins resolution",
+          "Implement 200ms debounce on both canvas→code and code→canvas directions",
+          "Implement FingerprintMatcher: compute fingerprint from node type + label + nesting path",
+          "Implement SidecarStore for .puml.meta file: read/write position map alongside .puml",
+          "Implement ConflictResolver: compare timestamps, preserve later edit, regenerate the other",
+          "Guard against infinite sync loops (skip update if incoming content matches current state)",
+          "Wire SyncEngine to Canvas (onNodesChange, onEdgesChange) and Editor (onChange)",
+          "Create src/sync/index.ts barrel export"
+        ],
+        "completionSignal": "TC-D-1 and TC-D-2 both pass."
+      },
+      {
+        "taskId": "TASK-10",
+        "title": "Integration: App Shell and Wiring",
+        "objective": "Wire all concerns together in App.tsx with layout, menu IPC, and sync lifecycle.",
+        "dependsOn": ["TASK-05", "TASK-06", "TASK-07", "TASK-08", "TASK-09"],
+        "relatedTestcases": ["TC-BIZ-SVC-1"],
+        "targetPaths": [
+          "src/renderer/App.tsx",
+          "src/renderer/AppLayout.tsx",
+          "src/renderer/hooks/useMenuIPC.ts",
+          "src/renderer/hooks/useAppLifecycle.ts"
+        ],
+        "steps": [
+          "Create AppLayout.tsx: left palette, center canvas, right code editor (adjustable split)",
+          "Create App.tsx: instantiate SyncEngine, wire to Canvas and Editor, provide context",
+          "Implement useMenuIPC: listen for menu actions from main process via IPC",
+          "Wire File→Open to Parser → Sync → Canvas render",
+          "Wire File→Export .puml to Generator → Sync → Save dialog",
+          "Wire File→Export .png to Generator → Python backend render → Save dialog",
+          "Implement useAppLifecycle: new diagram, import, export, close",
+          "Wire Edit→Undo/Redo to canvas history"
+        ],
+        "completionSignal": "TC-BIZ-SVC-1 passes: end-to-end workflow works."
+      },
+      {
+        "taskId": "TASK-11",
+        "title": "Electron Shell: Python Backend Subprocess Manager",
+        "objective": "Implement Python backend subprocess management: spawn on export, health-check, graceful shutdown.",
+        "dependsOn": ["TASK-05", "TASK-10"],
+        "relatedTestcases": ["TC-G-2"],
+        "targetPaths": [
+          "src/main/pythonBackend.ts",
+          "src/main/healthCheck.ts",
+          "src/main/downloadManager.ts"
+        ],
+        "steps": [
+          "Implement PythonBackendManager: spawn PyInstaller exe (or python dev script) on first export trigger",
+          "Implement health check polling: GET /health every 2s up to 5s timeout",
+          "Implement graceful shutdown: SIGTERM → wait 3s → SIGKILL",
+          "Wire to menu action: Export .png triggers backend spawn if not running",
+          "Implement JRE download manager (first launch): download jlink-minimal JRE with progress",
+          "Implement PlantUML JAR download manager (first launch): download plantuml.jar with progress",
+          "Wire first-launch download sequence with progress UI in renderer via IPC"
+        ],
+        "completionSignal": "TC-G-2 passes: subprocess lifecycle works correctly."
+      },
+      {
+        "taskId": "TASK-12",
+        "title": "Python Backend Stripping: Remove Manipulation Endpoints",
+        "objective": "Strip the Python Flask backend to only /render (SVG) and /renderPNG endpoints. Remove all ~40 legacy manipulation endpoints.",
+        "dependsOn": ["TASK-11"],
+        "relatedTestcases": ["TC-CONST-PY-1"],
+        "targetPaths": [
+          "src/python-backend/app.py",
+          "src/python-backend/render.py",
+          "src/python-backend/requirements.txt"
+        ],
+        "steps": [
+          "Create new minimal Python backend at src/python-backend/ with only Flask and pyquery dependencies",
+          "Implement /render endpoint: accept PlantUML text, invoke Java + plantuml.jar, return SVG",
+          "Implement /renderPNG endpoint: accept PlantUML text, invoke Java + plantuml.jar, return PNG binary",
+          "Remove all activity/, sequence/, shared/ routes from legacy src/plantuml_gui/",
+          "Keep Flask app structure but remove blueprint registrations for activity_bp and sequence_bp",
+          "Update pyproject.toml to reflect stripped dependencies",
+          "Verify existing Python tests (tests/) are updated or removed",
+          "Configure PyInstaller spec to package only the minimal backend"
+        ],
+        "completionSignal": "TC-CONST-PY-1 passes: only /render and /renderPNG endpoints exist."
+      },
+      {
+        "taskId": "TASK-13",
+        "title": "Installer Configuration and First-Launch Flow",
+        "objective": "Configure electron-builder with NSIS for Windows installer and implement first-launch dependency download flow.",
+        "dependsOn": ["TASK-11", "TASK-12"],
+        "relatedTestcases": ["TC-TECH-INST-1", "TC-TECH-JRE-1", "TC-TECH-PLANTUML-1"],
+        "targetPaths": [
+          "electron-builder.yml",
+          "src/main/installer.ts",
+          "src/renderer/components/FirstLaunchWizard.tsx"
+        ],
+        "steps": [
+          "Configure electron-builder.yml for NSIS target: one-click installer, Program Files install, shortcuts",
+          "Bundle PyInstaller-built Python backend exe as extraResource in electron-builder",
+          "Implement FirstLaunchWizard React component: progress bars for JRE and PlantUML JAR downloads",
+          "Wire download sequence: check JRE presence → download if missing → check plantuml.jar → download if missing",
+          "Implement download retry with error handling and user notification",
+          "Test clean install on Windows 10/11 VM"
+        ],
+        "completionSignal": "TC-TECH-INST-1, TC-TECH-JRE-1, TC-TECH-PLANTUML-1 all pass."
+      },
+      {
+        "taskId": "TASK-14",
+        "title": "Architecture Test Physicalization",
+        "objective": "Create all physical test entrypoint scripts and guardrail checks referenced in explicitEntrypoints and criticalNonExplicitTests. Wire acceptanceCriteria in the intent graph to point to these scripts.",
+        "dependsOn": ["TASK-02", "TASK-03", "TASK-04", "TASK-06", "TASK-07", "TASK-08", "TASK-09", "TASK-11"],
+        "relatedTestcases": [
+          "TC-AST-1", "TC-AST-2", "TC-B-1", "TC-B-2", "TC-C-1", "TC-C-2",
+          "TC-D-1", "TC-D-2", "TC-E-1", "TC-E-2", "TC-F-1", "TC-F-2",
+          "TC-G-1", "TC-G-2", "TC-BIZ-SVC-1"
+        ],
+        "targetPaths": [
+          "tests/model/test_ast_types.mjs",
+          "tests/model/test_ast_serialization.mjs",
+          "tests/e2e/test_canvas_node_types.mjs",
+          "tests/e2e/test_canvas_dragdrop_levels.mjs",
+          "tests/e2e/test_editor_syntax_highlighting.mjs",
+          "tests/e2e/test_editor_debounce_events.mjs",
+          "tests/e2e/test_sync_last_write_wins.mjs",
+          "tests/e2e/test_sync_fingerprint_preservation.mjs",
+          "tests/parser/test_parser_activity_diagram.mjs",
+          "tests/generator/test_generator_roundtrip.mjs",
+          "tests/e2e/test_palette_categories.mjs",
+          "tests/e2e/test_palette_drag_to_canvas.mjs",
+          "tests/e2e/test_electron_native_menus.mjs",
+          "tests/e2e/test_electron_python_subprocess.mjs",
+          "tests/e2e/test_biz_service_end_to_end.mjs",
+          "tests/arch/test_dependency_direction.mjs",
+          "tests/arch/test_python_backend_endpoints.mjs",
+          "tests/arch/test_ts_strict_mode.mjs",
+          "tests/arch/test_implements_mappings.mjs",
+          "tests/arch/test_no_inline_styles.mjs",
+          "tests/arch/test_architecture_runner_integration.mjs"
+        ],
+        "steps": [
+          "For each explicitEntrypoint, create an executable .mjs script that validates the corresponding acceptance criteria",
+          "For unit-testable concerns (A, E), scripts invoke Vitest via child_process or import compiled TypeScript",
+          "For E2E-testable concerns (B, C, D, F, G, BIZ), scripts use Playwright's Electron support to automate the built app",
+          "Create architecture guardrail test scripts (arch/ directory) as Node.js scripts doing static analysis",
+          "Update the acceptanceCriteria field in SystemArchitecture.json for each testcase to point to the physical test script path",
+          "Write test-failure-records.json with expected failures for all testcases (code not yet written)",
+          "Verify argo_runArchitectureTests can discover and list all testcases"
+        ],
+        "completionSignal": "argo_runArchitectureTests discovers all 15 acceptance testcases and 6 guardrail tests, all reporting expected-failure."
+      }
+    ]
+  },
+
+  "frozenFiles": [
+    ".opencode/opencode.json",
+    ".argo/schema/ImplementationToCodingHandoff.schema.json",
+    ".argo/schema/IntentToImplementationHandoff.schema.json",
+    ".argo/schema/SystemArchitecture.schema.json",
+    ".argo/schema/ImplementationToIntentTraceProposal.schema.json",
+    ".argo/scripts/argo-mcp-server.js",
+    ".argo/scripts/systemarchitecture-mcp-server.js",
+    ".argo/scripts/validator-mcp-server.js",
+    ".argo/scripts/validateSystemArchitecture.js",
+    ".argo/scripts/validateStageHandoff.js",
+    ".argo/scripts/validateTraceProposal.js",
+    ".argo/scripts/runArchitectureTests.js",
+    ".argo/scripts/archimate32-rules.js",
+    "design/KG/SystemArchitecture.json",
+    "design/KG/IntentToImplementationHandoff.json",
+    "LICENSE",
+    "SECURITY.md",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md"
+  ],
+
+  "openGaps": [
+    "The Python backend stripping strategy (TASK-12) requires careful handling: the existing src/plantuml_gui/ has ~40 endpoints across activity/, sequence/, and shared/ blueprints. The handoff recommends creating a new minimal src/python-backend/ with only /render and /renderPNG endpoints, keeping the old backend as reference until migration is complete.",
+    "Playwright Electron support (@playwright/test + electron) must be installed and configured. The handoff tests/e2e/ scripts assume Playwright can launch and control the built Electron app. This setup must be validated on Windows 10/11.",
+    "The project currently has no package.json at root level (Python-only project). TASK-01 must create one. This will introduce npm as a build dependency alongside uv/pip.",
+    "The JRE download (jlink minimal ~40MB) requires a trusted download source. The handoff recommends GitHub Releases or the Adoptium API. The exact URL must be confirmed and hardcoded in TASK-11.",
+    "The PlantUML JAR download (~20MB) requires a trusted download source (Maven Central or PlantUML GitHub releases). The exact URL must be confirmed in TASK-11.",
+    "The fingerprint-based sidecar file (.puml.meta) strategy from the intent handoff open question is adopted. The SidecarStore in TASK-09 must handle concurrent access and file locking for safety.",
+    "The Undo/Redo mechanism for canvas edits is not explicitly defined in the intent graph but is required by TC-G-1 (Edit→Undo/Redo). The coding stage must implement canvas edit history with Command pattern or ReactFlow's built-in undo/redo.",
+    "The project's existing Python tests (tests/activity/, tests/sequence/, tests/e2e/) test the Flask web app. These must be updated or removed as part of TASK-12 to avoid false-positive test runs.",
+    "Architecture test runner currently only supports .py, .js, .cjs, .mjs, .ps1, .cmd, .bat extensions. Vitest TypeScript tests (.ts) are not directly supported. The handoff uses .mjs wrapper scripts that invoke Vitest or compiled TypeScript. This approach must be validated during TASK-14.",
+    "All 46 acceptance testcases have been physicalized to stub .mjs scripts that exit with failure (expected). TASK-14 must update each stub with real test logic that validates the implementation. The acceptanceCriteria field in SystemArchitecture.json has been updated to point to these scripts.",
+    "The ImplementationToIntentTraceProposal.json documents the acceptanceCriteria updates applied to the intent graph and proposes trace links from intent elements to implementation directories."
+  ]
+}

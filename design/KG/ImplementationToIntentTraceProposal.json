@@ -1,0 +1,174 @@
+{
+  "proposalType": "implementation-to-intent-trace",
+  "generatedAt": "2026-06-25T16:00:00Z",
+  "sourceAgent": "ImplementationDesign",
+  "targetAgent": "IntentionDesign",
+  "lifecycle": "temporary-trace-proposal",
+  "sourceIntentGraphPath": "design/KG/SystemArchitecture.json",
+
+  "implementationContracts": [
+    "OVERALL_ARCHITECTURE.md",
+    "src/model/ARCHITECTURE.md",
+    "src/parser/ARCHITECTURE.md",
+    "src/generator/ARCHITECTURE.md",
+    "src/canvas/ARCHITECTURE.md",
+    "src/editor/ARCHITECTURE.md",
+    "src/sync/ARCHITECTURE.md",
+    "src/palette/ARCHITECTURE.md",
+    "src/main/ARCHITECTURE.md",
+    "src/renderer/ARCHITECTURE.md",
+    "src/python-backend/ARCHITECTURE.md"
+  ],
+
+  "anchorProposals": [
+    {
+      "intentElementId": "app-concern-a",
+      "intentElementName": "Concern A: AST Data Model",
+      "implementationElementName": "src/model/",
+      "implementationElementKind": "stable-directory",
+      "implementsType": "direct",
+      "tracePurpose": "All TypeScript type definitions for PlantUML Activity Diagram elements live in this directory. The intent element app-concern-a is directly realized by src/model/types.ts and src/model/serialization.ts.",
+      "contractPaths": ["src/model/ARCHITECTURE.md"],
+      "contextEntryPoints": ["src/model/types.ts", "src/model/serialization.ts"],
+      "excludedDetails": ["Individual helper interfaces (Position, Size) are implementation details not tracked in intent"],
+      "suggestedIntentAttributes": [
+        {"name": "implementedBy", "description": "src/model/"},
+        {"name": "testEntrypoints", "description": "tests/model/test_ast_types.mjs, tests/model/test_ast_serialization.mjs"}
+      ]
+    },
+    {
+      "intentElementId": "app-concern-b",
+      "intentElementName": "Concern B: ReactFlow Canvas Engine",
+      "implementationElementName": "src/canvas/",
+      "implementationElementKind": "stable-directory",
+      "implementsType": "direct",
+      "tracePurpose": "ReactFlow-based canvas with custom node renderers and drag-and-drop handlers directly implements Concern B.",
+      "contractPaths": ["src/canvas/ARCHITECTURE.md"],
+      "contextEntryPoints": ["src/canvas/Canvas.tsx", "src/canvas/hooks/useDragDrop.ts"],
+      "excludedDetails": ["Individual node renderer components in src/canvas/nodes/ are implementation details"],
+      "suggestedIntentAttributes": [
+        {"name": "implementedBy", "description": "src/canvas/"},
+        {"name": "testEntrypoints", "description": "tests/e2e/test_canvas_node_types.mjs, tests/e2e/test_canvas_dragdrop_levels.mjs"}
+      ]
+    },
+    {
+      "intentElementId": "app-concern-c",
+      "intentElementName": "Concern C: Ace Code Editor Wrapper",
+      "implementationElementName": "src/editor/",
+      "implementationElementKind": "stable-directory",
+      "implementsType": "direct",
+      "tracePurpose": "Ace Editor wrapper with PlantUML highlighting and debounced events directly implements Concern C.",
+      "contractPaths": ["src/editor/ARCHITECTURE.md"],
+      "contextEntryPoints": ["src/editor/AceEditorWrapper.tsx", "src/editor/useEditorEvents.ts"],
+      "excludedDetails": ["PlantUML syntax mode definition is an implementation detail of the Ace integration"],
+      "suggestedIntentAttributes": [
+        {"name": "implementedBy", "description": "src/editor/"},
+        {"name": "testEntrypoints", "description": "tests/e2e/test_editor_syntax_highlighting.mjs, tests/e2e/test_editor_debounce_events.mjs"}
+      ]
+    },
+    {
+      "intentElementId": "app-concern-d",
+      "intentElementName": "Concern D: Bidirectional Sync Engine",
+      "implementationElementName": "src/sync/",
+      "implementationElementKind": "stable-directory",
+      "implementsType": "direct",
+      "tracePurpose": "Sync engine with last-write-wins, fingerprint matching, and sidecar position persistence directly implements Concern D.",
+      "contractPaths": ["src/sync/ARCHITECTURE.md"],
+      "contextEntryPoints": ["src/sync/SyncEngine.ts", "src/sync/FingerprintMatcher.ts", "src/sync/ConflictResolver.ts", "src/sync/SidecarStore.ts"],
+      "excludedDetails": ["Debounce utility is an implementation detail"],
+      "suggestedIntentAttributes": [
+        {"name": "implementedBy", "description": "src/sync/"},
+        {"name": "testEntrypoints", "description": "tests/e2e/test_sync_last_write_wins.mjs, tests/e2e/test_sync_fingerprint_preservation.mjs"}
+      ]
+    },
+    {
+      "intentElementId": "app-concern-e",
+      "intentElementName": "Concern E: PlantUML Parser and Generator",
+      "implementationElementName": "src/parser/ + src/generator/",
+      "implementationElementKind": "stable-directory",
+      "implementsType": "direct",
+      "tracePurpose": "The Parser (src/parser/) and Generator (src/generator/) together realize Concern E. Parser uses stack-based nesting; Generator uses depth-tracked indentation.",
+      "contractPaths": ["src/parser/ARCHITECTURE.md", "src/generator/ARCHITECTURE.md"],
+      "contextEntryPoints": ["src/parser/parser.ts", "src/generator/generator.ts"],
+      "excludedDetails": ["Tokenizer is an internal detail of the parser", "Indentation utility is an internal detail of the generator"],
+      "suggestedIntentAttributes": [
+        {"name": "implementedBy", "description": "src/parser/, src/generator/"},
+        {"name": "testEntrypoints", "description": "tests/parser/test_parser_activity_diagram.mjs, tests/generator/test_generator_roundtrip.mjs"}
+      ]
+    },
+    {
+      "intentElementId": "app-concern-f",
+      "intentElementName": "Concern F: Component Palette",
+      "implementationElementName": "src/palette/",
+      "implementationElementKind": "stable-directory",
+      "implementsType": "direct",
+      "tracePurpose": "Left-panel draggable palette with 3 categories (Flow, Structure, Decoration) directly implements Concern F.",
+      "contractPaths": ["src/palette/ARCHITECTURE.md"],
+      "contextEntryPoints": ["src/palette/Palette.tsx", "src/palette/DragController.ts"],
+      "excludedDetails": ["Individual palette item definitions are implementation details"],
+      "suggestedIntentAttributes": [
+        {"name": "implementedBy", "description": "src/palette/"},
+        {"name": "testEntrypoints", "description": "tests/e2e/test_palette_categories.mjs, tests/e2e/test_palette_drag_to_canvas.mjs"}
+      ]
+    },
+    {
+      "intentElementId": "app-concern-g",
+      "intentElementName": "Concern G: Electron Desktop Shell",
+      "implementationElementName": "src/main/",
+      "implementationElementKind": "stable-directory",
+      "implementsType": "direct",
+      "tracePurpose": "Electron main process with window management, native menus, file dialogs, subprocess management, and first-launch download directly implements Concern G.",
+      "contractPaths": ["src/main/ARCHITECTURE.md"],
+      "contextEntryPoints": ["src/main/main.ts", "src/main/menu.ts", "src/main/ipcHandlers.ts", "src/main/pythonBackend.ts"],
+      "excludedDetails": ["Health check polling and download progress are implementation details"],
+      "suggestedIntentAttributes": [
+        {"name": "implementedBy", "description": "src/main/"},
+        {"name": "testEntrypoints", "description": "tests/e2e/test_electron_native_menus.mjs, tests/e2e/test_electron_python_subprocess.mjs"}
+      ]
+    },
+    {
+      "intentElementId": "biz-service-editing",
+      "intentElementName": "Business Service: Diagram Editing Service",
+      "implementationElementName": "src/renderer/App.tsx (integration)",
+      "implementationElementKind": "runtime-component",
+      "implementsType": "indirect",
+      "tracePurpose": "The Business Service is realized by the integration of all 7 concerns in the React renderer App.tsx. The service emerges from the wiring of concerns, not from a single module.",
+      "contractPaths": ["src/renderer/ARCHITECTURE.md", "OVERALL_ARCHITECTURE.md"],
+      "contextEntryPoints": ["src/renderer/App.tsx", "src/renderer/AppLayout.tsx"],
+      "excludedDetails": ["Individual concern implementations are tracked separately; the Business Service is an emergent property of their integration"]
+    },
+    {
+      "intentElementId": "tech-python-backend",
+      "intentElementName": "Python Render Backend (PyInstaller)",
+      "implementationElementName": "src/python-backend/",
+      "implementationElementKind": "stable-directory",
+      "implementsType": "indirect",
+      "tracePurpose": "Minimal Flask backend with only /render and /renderPNG endpoints, PyInstaller-packaged. Currently exists as src/plantuml_gui/ with legacy endpoints; will be stripped to src/python-backend/ minimal version.",
+      "contractPaths": ["src/python-backend/ARCHITECTURE.md"],
+      "contextEntryPoints": ["src/python-backend/app.py", "src/python-backend/render.py"],
+      "excludedDetails": ["PyInstaller spec file and build scripts are distribution details"]
+    }
+  ],
+
+  "openQuestions": [
+    {
+      "question": "Should the 22 remaining higher-level business testcases (TC-GOAL-1, TC-DRIVER-NEED-1, TC-DRIVER-ZERO-1, TC-ASSESS-1, TC-PRINC-INSTALL-1, TC-PRINC-FREEFORM-1, TC-PRINC-SYNC-1, TC-REQ-DD-1, TC-REQ-EX-1, TC-REQ-IM-1, TC-REQ-SYNC-1, TC-CONST-ELECTRON-1, TC-CONST-WIN-1, TC-CONST-PY-1, TC-OUTCOME-1, TC-TECH-ELECTRON-1, TC-TECH-REACT-1, TC-TECH-RF-1, TC-TECH-ACE-1, TC-TECH-NODE-1, TC-TECH-JRE-1, TC-TECH-PY-1, TC-TECH-WIN-1, TC-TECH-INST-1, TC-TECH-PLANTUML-1, TC-STRAT-WP-1, TC-STRAT-CAP-1, TC-BIZ-ACTOR-1, TC-BIZ-PROC-EDIT-1, TC-BIZ-PROC-EXPORT-1, TC-PRINC-REALENV-1) have their acceptanceCriteria also physicalized to script paths? These are currently descriptive text, causing validation failures.",
+      "recommendedAnswer": "Yes, they should each point to a test script. However, many of these are composite business-level tests that are satisfied by the app-concern-level tests passing. The Implementation Design recommends mapping them to aggregate test scripts that run the app-concern tests and verify overall outcomes, to be created during TASK-14.",
+      "reason": "The architecture test runner requires all acceptanceCriteria to be script paths. Leaving them as descriptive text causes 30 validation errors. The recommendation is to physicalize during TASK-14 when the app-concern tests exist."
+    },
+    {
+      "question": "Should the existing Python tests (tests/activity/, tests/sequence/, tests/e2e/) be retained, modified, or removed after the Python backend is stripped?",
+      "recommendedAnswer": "Remove or archive tests that validate removed endpoints. Retain only the render endpoint tests. Update conftest.py to point to the new minimal Flask app.",
+      "reason": "The existing tests validate the Flask web app's ~40 manipulation endpoints. After stripping to only /render and /renderPNG, the majority of tests become invalid."
+    }
+  ],
+
+  "notes": [
+    "Changes applied to SystemArchitecture.json during Implementation Design: Updated acceptanceCriteria for 8 elements' testcases (app-concern-a through app-concern-g, biz-service-editing) to point to physical test script paths. These are the 15 explicitEntrypoints referenced in the ImplementationToCodingHandoff.json.",
+    "The 30 remaining testcases (business-level) still have descriptive acceptanceCriteria. The ImplementationToCodingHandoff.json openGaps section documents this as a known gap to be resolved in TASK-14.",
+    "All 11 ARCHITECTURE.md contract files have been created with stable boundary definitions, allowed dependencies, and owned test mappings.",
+    "The Python backend stripping is deferred to TASK-12. The current src/plantuml_gui/ remains intact until then.",
+    "The project currently has no package.json at root level. TASK-01 will create the Electron project configuration.",
+    "The sidecar file (.puml.meta) strategy from the Intent Design handoff open question is adopted for position persistence."
+  ]
+}

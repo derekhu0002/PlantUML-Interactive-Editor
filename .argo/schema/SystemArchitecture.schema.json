@@ -214,6 +214,18 @@
         },
         "TestResults": {
           "$ref": "#/$defs/nonEmptyString"
+        },
+        "approvedByHuman": {
+          "type": "boolean",
+          "description": "Human approval flag. Must be true before intent-to-implementation handoff for any new or modified testcase."
+        },
+        "controlPoint": {
+          "$ref": "#/$defs/nonEmptyString",
+          "description": "The stimulus or input that triggers this test. Derived from the test Input or description."
+        },
+        "observationPoint": {
+          "$ref": "#/$defs/nonEmptyString",
+          "description": "Where or how the result is observed. Derived from acceptanceCriteria or test description."
         }
       }
     },

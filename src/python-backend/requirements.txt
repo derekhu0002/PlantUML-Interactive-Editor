@@ -1,0 +1,3 @@
+# Python Render Backend dependencies
+# Minimal Flask with only rendering endpoints
+flask>=3.0.0

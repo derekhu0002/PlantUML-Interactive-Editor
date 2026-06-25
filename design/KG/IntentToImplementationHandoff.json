@@ -1,0 +1,122 @@
+{
+  "stage": "intent-to-implementation",
+  "generatedAt": "2026-06-25T15:59:06Z",
+  "sourceIntentGraphPath": "design/KG/SystemArchitecture.json",
+  "intentElementIds": [
+    "biz-service-editing",
+    "biz-process-edit",
+    "biz-process-export",
+    "biz-actor-developer",
+    "strat-capability",
+    "strat-coa-port",
+    "mot-goal-desktop",
+    "mot-driver-need",
+    "mot-driver-zero",
+    "mot-assessment-web",
+    "mot-principle-install",
+    "mot-principle-freeform",
+    "mot-principle-sync",
+    "mot-req-dragdrop",
+    "mot-req-export",
+    "mot-req-import",
+    "mot-req-sync",
+    "mot-constraint-electron",
+    "mot-constraint-windows",
+    "mot-constraint-python-backend",
+    "mot-outcome",
+    "mot-principle-real-env-test",
+    "app-concern-a",
+    "app-concern-b",
+    "app-concern-c",
+    "app-concern-d",
+    "app-concern-e",
+    "app-concern-f",
+    "app-concern-g",
+    "tech-electron",
+    "tech-react-ts",
+    "tech-reactflow",
+    "tech-ace",
+    "tech-nodejs",
+    "tech-jre",
+    "tech-python-backend",
+    "tech-plantuml-jar",
+    "tech-windows-pc",
+    "tech-installer"
+  ],
+  "relationshipIds": [
+    "rel-driver-need-goal",
+    "rel-driver-zero-goal",
+    "rel-assessment-goal",
+    "rel-goal-outcome",
+    "rel-principle-install-req",
+    "rel-goal-coa",
+    "rel-coa-cap",
+    "rel-cap-service",
+    "rel-process-edit-svc",
+    "rel-process-export-svc",
+    "rel-actor-svc",
+    "rel-a-b",
+    "rel-a-e",
+    "rel-b-d",
+    "rel-c-d",
+    "rel-e-d",
+    "rel-d-c",
+    "rel-g-a",
+    "rel-g-b",
+    "rel-g-c",
+    "rel-g-d",
+    "rel-g-e",
+    "rel-g-f",
+    "rel-tech-jre-backend",
+    "rel-tech-plantuml-backend",
+    "rel-tech-electron-g",
+    "rel-tech-py-g",
+    "rel-principle-realenv-outcome"
+  ],
+  "summary": "This handoff covers the delivery of the **Business Service: Diagram Editing Service** (biz-service-editing) — an interactive drag-and-drop PlantUML activity diagram editor for Windows desktop. The service enables developers to create, edit, import, export, and sync PlantUML diagrams without manual environment setup or PlantUML syntax knowledge.\n\n## Scope\n\n**Motivation & Strategy:** The work is driven by developer need for intuitive PlantUML editing (mot-driver-need) and zero-configuration setup (mot-driver-zero), informed by current web app friction (mot-assessment-web). The strategic goal is to deliver a PlantUML Desktop Editor (mot-goal-desktop) realized through the Work Package: Port web app to Electron desktop (strat-coa-port), which establishes the Capability: Desktop PlantUML Editing (strat-capability). The expected Outcome (mot-outcome) is that developers create PlantUML diagrams via drag-and-drop on Windows.\n\n**Principles & Requirements:** Four anchoring principles guide implementation: single-click zero-config installer (mot-principle-install), free-form canvas positioning (mot-principle-freeform), last-write-wins bidirectional sync (mot-principle-sync), and real-environment acceptance testing (mot-principle-real-env-test) which mandates that all acceptance tests must execute against the actual built Windows desktop application. Four functional requirements must be delivered: drag-and-drop Activity Diagram editing (mot-req-dragdrop), one-click export to .puml and .png (mot-req-export), import existing .puml files (mot-req-import), and bidirectional canvas-code synchronization (mot-req-sync). Three technical constraints apply: Electron + React + TypeScript stack (mot-constraint-electron), Windows-only desktop application (mot-constraint-windows), and Python backend minimal footprint limited to rendering only (mot-constraint-python-backend).\n\n**Business Layer:** The service is realized by two business processes: Edit Diagram (biz-process-edit) — palette drag, canvas placement, connector creation, container nesting, code sync — and Export Diagram (biz-process-export) — one-click .puml and .png export. The primary business actor is the Developer (biz-actor-developer).\n\n**Application Concerns (A–G):** Seven orthogonal concerns must be implemented:\n- **A: AST Data Model** — TypeScript types for all PlantUML activity diagram elements, container nesting, serialization/deserialization\n- **B: ReactFlow Canvas Engine** — free-form canvas with custom node renderers, drag-and-drop, connection handles\n- **C: Ace Code Editor Wrapper** — syntax highlighting, line markers, debounced change events (200ms)\n- **D: Bidirectional Sync Engine** — last-write-wins conflict resolution, fingerprint matching, version tracking\n- **E: PlantUML Parser and Generator** — stack-based parser, depth-tracked generator, tolerance for unsupported features\n- **F: Component Palette** — left-panel draggable items in Flow/Structure/Decoration categories\n- **G: Electron Desktop Shell** — main process, native menus, file dialogs, subprocess management for Python backend, first-launch downloads, auto-updater\n\nConcern G serves all other concerns (A–F). Concern A provides types for B and E. Concerns B, C, and E connect to D for synchronization. D also updates C (code editor).\n\n**Technology Stack:** The implementation must use Electron (tech-electron) with React 18+ + TypeScript + Vite (tech-react-ts) for the renderer, ReactFlow (tech-reactflow) for canvas, Ace Editor (tech-ace) for code editing, Node.js (tech-nodejs) for main process, JRE jlink minimal ~40MB (tech-jre) for PlantUML rendering, Python Render Backend via PyInstaller (tech-python-backend) for SVG/PNG rendering, PlantUML JAR ~20MB (tech-plantuml-jar), NSIS Installer Artifact (tech-installer) via electron-builder, and Windows PC (tech-windows-pc) as the target device.\n\n## What Implementation Must Produce\n\n1. A self-contained Windows desktop application (.exe installer via NSIS) that:\n   - Runs as standalone without browser, Python, Java, or .env setup\n   - Downloads JRE (~40MB) and PlantUML JAR (~20MB) on first launch\n   - Provides drag-and-drop editing of PlantUML Activity Diagrams\n   - Synchronizes canvas and code editor bidirectionally (200ms debounce, last-write-wins)\n   - Allows importing existing .puml files with default grid layout\n   - Allows exporting to .puml (logical structure) and .png (rendered via PlantUML)\n2. TypeScript AST data model as the foundation for all diagram editing logic\n3. Python backend reduced to only /render (SVG) and /renderPNG endpoints\n4. All ~40 legacy PlantUML manipulation endpoints replaced by TypeScript AST\n5. Acceptance test cases defined in the intent graph must pass (see each element's testcases)\n\n## Key Architecturally Significant Boundaries\n\n- Free-form canvas positioning: PlantUML auto-layout is NOT used for editing; .puml export contains logical structure only (no positional data)\n- Canvas-code sync: Last-write-wins by timestamp; fingerprint matching preserves element positions across re-parses\n- ContainerNode abstraction supports nesting via children array\n- Unrecognized PlantUML features shown as grey read-only blocks on import\n- Python backend lifecycle: spawned on first export, health-check polling, graceful shutdown within 3s of SIGTERM",
+  "openQuestions": [
+    {
+      "question": "What DPI/resolution should the .png export use?",
+      "recommendedAnswer": "Use PlantUML's default output resolution (96 DPI) initially, with no user-configurable option for MVP. This matches the web app's existing behavior.",
+      "reason": "The requirement (mot-req-export) specifies 'one-click export' implying no configuration dialog. Keeping 96 DPI avoids UI complexity. A future enhancement could add a resolution picker."
+    },
+    {
+      "question": "How are element positions preserved across .puml re-import when the .puml format does not store positional data?",
+      "recommendedAnswer": "Use a companion sidecar file (e.g., `.puml.meta` JSON) stored alongside the .puml file that maps element fingerprints to canvas positions. When the sidecar is missing, fall back to default grid layout.",
+      "reason": "TC-D-2 requires fingerprint matching to preserve positions. A sidecar file is the simplest way to persist positions without polluting the .puml format. The fingerprint is computed from the element's text content (type + label + nesting path)."
+    },
+    {
+      "question": "Should the application support opening multiple diagrams in tabs, or is single-window single-diagram sufficient for MVP?",
+      "recommendedAnswer": "Single-window single-diagram for MVP. Multi-tab support adds significant complexity to Concern G (Electron shell window management) and can be added post-MVP.",
+      "reason": "No requirement in the intent graph specifies multi-tab support. The business processes (Edit Diagram, Export Diagram) assume a single active diagram. Delaying multi-tab avoids scope creep."
+    },
+    {
+      "question": "What is the expected behavior when the user edits code in a way that creates a syntactically invalid PlantUML diagram?",
+      "recommendedAnswer": "The parser (Concern E) should handle partial/syntactically-invalid states gracefully: show unrecognized features as grey read-only blocks (same as TC-REQ-IM-1 behavior). The canvas should still display whatever was last successfully parsed. Do not block code edits due to parse errors.",
+      "reason": "The requirements (TC-REQ-SYNC-1, TC-E-1/2) describe sync behavior during editing, but do not specify error recovery. Graceful degradation to read-only display for invalid portions is consistent with the import tolerance pattern."
+    },
+    {
+      "question": "What testing framework and approach should the implementation team use?",
+      "recommendedAnswer": "Use Vitest for unit tests (TypeScript-native, Vite-compatible) and Playwright for E2E tests (Electron support) targeting the real built Electron app on Windows 10/11. Acceptance tests defined in the intent graph MUST run as Playwright E2E tests against the actual built Windows desktop application (mot-principle-real-env-test). Unit tests with mocked Electron/Node APIs are acceptable for lower-level Concerns A (AST) and E (Parser/Generator), but all acceptance-level testcases must execute in a real app instance.",
+      "reason": "The principle mot-principle-real-env-test (Real-environment acceptance testing) mandates that all acceptance tests execute against the actual built Windows desktop application. Playwright has first-class Electron support for real-environment testing. The tech stack (Vite) makes Vitest the natural unit test choice for non-acceptance testing."
+    },
+    {
+      "question": "What is the auto-update mechanism for delivering new versions to users?",
+      "recommendedAnswer": "Use electron-updater (from electron-builder) with GitHub Releases as the update source. This is the standard approach for Electron + electron-builder workflows. Implement auto-check on startup with a user notification and optional download.",
+      "reason": "Concern G (Electron Desktop Shell) mentions 'auto-updater' in its description, but no requirement defines it. electron-updater is the de facto standard for electron-builder distributions and integrates seamlessly with NSIS installers."
+    }
+  ],
+  "notes": [
+    "All acceptance testcases defined in the intent graph elements must be implemented as executable tests. Each element's testcases (TC-*) are listed under its 'testcases' array in SystemArchitecture.json.",
+    "The implementation stage must produce an Implementation Architecture (OVERALL_ARCHITECTURE.md + local ARCHITECTURE.md per stable directory) before any coding begins. See .opencode/skills/ for stage workflows.",
+    "The Python backend must NOT retain any of the ~40 legacy manipulation endpoints. Only /render (SVG) and /renderPNG endpoints are permitted.",
+    "The first-launch download flow (JRE + PlantUML JAR) is critical for the zero-config promise. Ensure progress indication and error handling are robust, as this is the user's first impression.",
+    "The Bidirectional Sync Engine (Concern D) must guard against infinite sync loops. The 200ms debounce and timestamp-based last-write-wins are mandatory safeguards.",
+    "The .puml export must NOT embed positional/CSS data. If a sidecar file (.puml.meta) is used for positions, it must be explicitly named and documented so users understand it is not part of standard PlantUML.",
+    "All technology components listed should be validated against the constraint that the Electron renderer process runs the React app, the main process handles native APIs, and subprocess management spawns Python/PyInstaller only when rendering is triggered.",
+    "The NSIS installer must install to Program Files by default, create desktop and Start Menu shortcuts, and provide a clean uninstall path. See TC-TECH-INST-1 for acceptance criteria.",
+    "This handoff was generated from design/KG/SystemArchitecture.json. Any subsequent changes to the intent graph should trigger a new handoff.",
+    "CRITICAL: Principle mot-principle-real-env-test (Real-environment acceptance testing) mandates that ALL acceptance tests MUST execute against the actual built Windows desktop application (Electron + React) on a real Windows 10/11 environment. Architecture tests must validate behavior on a real Windows instance. Unit tests with mocked Electron/Node APIs are acceptable only for sub-acceptance-level testing (e.g., Concerns A and E). Playwright E2E is the recommended approach for real-environment acceptance testing.",
+    "All new or modified acceptance testcases must be written as Playwright E2E tests targeting the built Electron app, not simulated/headless/mock environments."
+  ]
+}
