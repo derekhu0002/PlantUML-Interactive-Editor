@@ -1,0 +1,1300 @@
+{
+  "name": "PlantUML Interactive Desktop",
+  "description": "Intent architecture for PlantUML Interactive Desktop — a Windows application enabling drag-and-drop PlantUML diagram editing with free-position canvas, bidirectional code-canvas sync, and one-click export.",
+  "elements": [
+    {
+      "id": "stakeholder-dev",
+      "name": "Individual Developer",
+      "type": "Stakeholder",
+      "description": "Primary user persona: individual developer who needs intuitive PlantUML diagram editing on Windows without manual environment setup"
+    },
+    {
+      "id": "driver-need",
+      "name": "Need for Intuitive PlantUML Editing on Windows",
+      "type": "Driver",
+      "description": "Existing PlantUML editors are either web-based, code-only, or require complex setup. Developers want a native Windows experience with visual drag-and-drop."
+    },
+    {
+      "id": "assessment-current",
+      "name": "Current Web App Limitations",
+      "type": "Assessment",
+      "description": "The existing Flask web application: (1) requires browser plus running server, (2) no drag-and-drop interaction, (3) requires manual Java installation, (4) right-click modal-based editing limits UX"
+    },
+    {
+      "id": "goal-main",
+      "name": "Windows Desktop PlantUML Editor with Drag-and-Drop",
+      "type": "Goal",
+      "description": "Deliver a native Windows application that allows users to edit PlantUML diagrams by directly dragging elements onto a free-position canvas, rearranging them visually, and connecting them with drag-to-link interactions",
+      "subdiagram_views": [
+        { "view_id": "Motivation-Overview", "view_name": "Motivation Overview" },
+        { "view_id": "Principles-Requirements", "view_name": "Principles and Core Requirements" },
+        { "view_id": "Motivation-Constraints", "view_name": "Architecture Constraints" },
+        { "view_id": "Acceptance-Install-Export", "view_name": "Acceptance: Install and Export" },
+        { "view_id": "Acceptance-Interaction", "view_name": "Acceptance: Canvas Interaction" },
+        { "view_id": "Acceptance-Parse", "view_name": "Acceptance: Import and Parse" }
+      ]
+    },
+    {
+      "id": "outcome-oneclick-install",
+      "name": "One-Click Install with Zero Manual Setup",
+      "type": "Outcome",
+      "description": "User downloads a single installer, clicks Next-Next-Install-Finish, and the application is ready. JRE and PlantUML JAR are downloaded automatically on first launch."
+    },
+    {
+      "id": "outcome-dragdrop",
+      "name": "Visual Drag-and-Drop Editing Experience",
+      "type": "Outcome",
+      "description": "Users can drag elements from a component palette onto a canvas, reposition them freely, reconnect arrows by dragging handles, and see real-time PlantUML code synchronization."
+    },
+    {
+      "id": "principle-free-position",
+      "name": "Free Positioning Canvas",
+      "type": "Principle",
+      "description": "The canvas allows users to place elements at any (x, y) coordinate. Position is NOT encoded in the exported .puml file since PlantUML is an auto-layout engine."
+    },
+    {
+      "id": "principle-last-op-wins",
+      "name": "Last Operation Wins for Bidirectional Sync",
+      "type": "Principle",
+      "description": "When both canvas and code editor are modified concurrently, the last-touched side (by timestamp) determines the authoritative state."
+    },
+    {
+      "id": "principle-tolerant-import",
+      "name": "Tolerant Import with Unsupported Block Passthrough",
+      "type": "Principle",
+      "description": "When importing PlantUML files containing unsupported diagram types, the parser parses what it can and stores unrecognized text as opaque UnsupportedBlock nodes."
+    },
+    {
+      "id": "req-activity-diagram",
+      "name": "Full Activity Diagram Support",
+      "type": "Requirement",
+      "description": "Must support: Activity (color/URL/break/detach), Start/Stop/End, If/Else/Elseif, While/EndWhile, Repeat, Fork, Switch, Note, Group/Partition, Title, Connector, Merge, Arrow labels."
+    },
+    {
+      "id": "req-free-canvas",
+      "name": "Free-Form Canvas with Drag-and-Drop (All Three Levels)",
+      "type": "Requirement",
+      "description": "Canvas must support Level A (palette to add), Level B (rearrange), Level C (reconnect arrows). Elements freely positionable.",
+      "subdiagram_views": [
+        { "view_id": "Canvas-Interaction", "view_name": "Canvas and Palette Components" }
+      ]
+    },
+    {
+      "id": "req-export-puml",
+      "name": "One-Click Export to Valid .puml",
+      "type": "Requirement",
+      "description": "Export button produces a valid PlantUML .puml file. Position information excluded per free-position principle."
+    },
+    {
+      "id": "req-export-png",
+      "name": "One-Click Export to PNG via Java Rendering",
+      "type": "Requirement",
+      "description": "Export PNG invokes java -jar plantuml.jar -tpng on the backend."
+    },
+    {
+      "id": "req-import-puml",
+      "name": "Import Existing .puml Files with Grid Layout",
+      "type": "Requirement",
+      "description": "Importing a .puml file parses text into AST and renders on a default grid layout."
+    },
+    {
+      "id": "req-code-sync",
+      "name": "Bidirectional Code-Canvas Real-Time Sync",
+      "type": "Requirement",
+      "description": "Canvas edits update code (debounced 200ms). Code edits re-parse and update canvas. Last-op-wins resolves conflicts."
+    },
+    {
+      "id": "constraint-no-manual-java",
+      "name": "No Manual Java Installation Required",
+      "type": "Constraint",
+      "description": "End users must never be asked to install Java, Python, or any runtime manually."
+    },
+    {
+      "id": "constraint-no-manual-python",
+      "name": "No Manual Python Installation Required",
+      "type": "Constraint",
+      "description": "Python backend must be PyInstaller-compiled into a standalone executable."
+    },
+    {
+      "id": "constraint-valid-puml",
+      "name": "Exported .puml Must Be Valid PlantUML",
+      "type": "Constraint",
+      "description": "Every exported .puml file must be parseable by standard PlantUML tooling."
+    },
+    {
+      "id": "constraint-windows-only",
+      "name": "Windows-Only Target (Installer for Windows 10/11 x64)",
+      "type": "Constraint",
+      "description": "The initial deliverable targets only Windows 10/11 64-bit via NSIS installer."
+    },
+    {
+      "id": "business-process-create-diagram",
+      "name": "Create PlantUML Diagram",
+      "type": "Business Process",
+      "description": "End-to-end user workflow: start app, add elements on canvas, arrange by drag, connect by drag, preview, export .puml or .png",
+      "subdiagram_views": [
+        { "view_id": "BusinessLayer", "view_name": "Business Layer" }
+      ]
+    },
+    {
+      "id": "business-object-model",
+      "name": "PlantUML Diagram Model (AST)",
+      "type": "Business Object",
+      "description": "The authoritative in-memory representation of a PlantUML diagram as a typed AST."
+    },
+    {
+      "id": "comp-ast-model",
+      "name": "AST Data Model",
+      "type": "Application Component",
+      "description": "TypeScript types and model library defining node types, edge types, container hierarchy, and DiagramModel. All other components depend on this.",
+      "subdiagram_views": [
+        { "view_id": "AST-Foundation", "view_name": "AST Foundation Layer" }
+      ]
+    },
+    {
+      "id": "comp-puml-parser",
+      "name": "PlantUML Parser Engine",
+      "type": "Application Component",
+      "description": "Parses PlantUML text into DiagramModel AST. Uses stack-based nesting tracking. Tolerant parsing with UnsupportedBlock fallback."
+    },
+    {
+      "id": "comp-puml-generator",
+      "name": "PlantUML Generator Engine",
+      "type": "Application Component",
+      "description": "Generates valid PlantUML text from DiagramModel AST. Tree-walk with depth-tracked indentation."
+    },
+    {
+      "id": "comp-canvas-engine",
+      "name": "ReactFlow Canvas Engine",
+      "type": "Application Component",
+      "description": "ReactFlow-based free-position canvas with custom nodes, connection handles, container nesting, drag-to-reorder, drag-to-connect."
+    },
+    {
+      "id": "comp-palette",
+      "name": "Component Palette",
+      "type": "Application Component",
+      "description": "Left-side panel listing draggable element types. Supports drag-to-canvas creation."
+    },
+    {
+      "id": "comp-code-editor",
+      "name": "Ace Code Editor Integration",
+      "type": "Application Component",
+      "description": "Ace editor wrapper with PlantUML syntax highlighting and line markers."
+    },
+    {
+      "id": "comp-sync-engine",
+      "name": "Bidirectional Sync Engine",
+      "type": "Application Component",
+      "description": "Manages canvas-code sync: version tracking, timestamp conflict detection, fingerprint position preservation, cycle prevention."
+    },
+    {
+      "id": "comp-electron-shell",
+      "name": "Electron Desktop Shell",
+      "type": "Application Component",
+      "description": "Electron main process: window management, native menus, file dialogs, subprocess management, JRE download, auto-update.",
+      "subdiagram_views": [
+        { "view_id": "Electron-Shell-Backend", "view_name": "Electron Shell and Backend" },
+        { "view_id": "TechnologyLayer", "view_name": "Technology Layer" }
+      ]
+    },
+    {
+      "id": "comp-python-backend",
+      "name": "Python Render Backend",
+      "type": "Application Component",
+      "description": "PyInstaller-compiled Flask app exposing render endpoints: POST /render (SVG), POST /renderPNG (PNG), GET /health."
+    },
+    {
+      "id": "node-windows",
+      "name": "Windows 10/11 x64 PC",
+      "type": "Node",
+      "description": "User's Windows desktop computer. Target deployment environment."
+    },
+    {
+      "id": "tech-electron",
+      "name": "Electron Runtime",
+      "type": "System Software",
+      "description": "Chromium-based desktop application runtime."
+    },
+    {
+      "id": "tech-jre",
+      "name": "JRE (jlink Minimal Runtime)",
+      "type": "System Software",
+      "description": "Minimal Java runtime (~40MB) with java.base and java.xml modules. Downloaded on first launch."
+    },
+    {
+      "id": "tech-plantuml-jar",
+      "name": "PlantUML JAR",
+      "type": "Artifact",
+      "description": "PlantUML v1.2022.5+ JAR file (~20MB) for rendering SVG/PNG. Downloaded on first launch."
+    },
+    {
+      "id": "tech-puml-file",
+      "name": "PlantUML File (.puml)",
+      "type": "Artifact",
+      "description": "Standard .puml file format. Import source and export target."
+    },
+    {
+      "id": "tech-png-file",
+      "name": "PNG Image File",
+      "type": "Artifact",
+      "description": "Rendered diagram as PNG image. Export-only artifact."
+    },
+    {
+      "id": "tech-installer",
+      "name": "NSIS Installer (.exe)",
+      "type": "Artifact",
+      "description": "Windows NSIS installer by electron-builder. Contains Electron and PyInstaller'd backend. JRE/PlantUML downloaded at first launch."
+    },
+    {
+      "id": "ac-test-install",
+      "name": "AC-001: Installation and First Launch",
+      "type": "Requirement",
+      "description": "Verification that installer requires no manual steps beyond Next-Next-Install-Finish.",
+      "attributes": [
+        { "name": "verification_focus", "value": "installer, first-launch, JRE download" }
+      ],
+      "testcases": [
+        {
+          "name": "ACCEPT-001",
+          "description": "User completes installation with default options and app starts with auto-download of rendering dependencies",
+          "type": "Acceptance Test",
+          "Input": "Double-click PlantUML-Editor-Setup-x.x.x.exe then accept defaults then Finish",
+          "acceptanceCriteria": "1. Installation completes with no Java or Python prompts\n2. First launch shows download progress dialog (~60MB total)\n3. On completion, empty activity diagram (start->stop) renders\n4. JRE at APPDATA\\PlantUML-Editor\\jre\\\n5. plantuml.jar at APPDATA\\PlantUML-Editor\\plantuml\\\n6. plantuml-backend.exe visible in task manager"
+        }
+      ]
+    },
+    {
+      "id": "ac-test-drag-add",
+      "name": "AC-002: Drag from Palette to Add Element (Level A)",
+      "type": "Requirement",
+      "description": "Verification that dragging an Activity from palette onto canvas creates a new node and updates code.",
+      "testcases": [
+        {
+          "name": "ACCEPT-002",
+          "description": "User drags Activity from palette to canvas blank area",
+          "type": "Acceptance Test",
+          "Input": "Left-click-hold Activity in palette then drag to canvas at (300, 200) then release",
+          "acceptanceCriteria": "1. Drag preview follows mouse\n2. Node appears at drop position with default text\n3. Code editor shows ':new activity;' at correct indentation\n4. Node position.x=300, position.y=200\n5. order index correct within parent scope"
+        }
+      ]
+    },
+    {
+      "id": "ac-test-drag-reorder",
+      "name": "AC-003: Drag to Reorder (Level B)",
+      "type": "Requirement",
+      "description": "Verification that dragging an element across containers updates model hierarchy and PlantUML text.",
+      "testcases": [
+        {
+          "name": "ACCEPT-003",
+          "description": "User drags Activity into an if/else container's then-branch",
+          "type": "Acceptance Test",
+          "Input": "Drag Activity A onto If container then-branch highlight zone then release",
+          "acceptanceCriteria": "1. If container highlights drop zone during drag\n2. Activity A appears inside then-branch\n3. Activity A.parentId = then-branch ContainerNode id\n4. Code shows Activity A inside if block with correct indentation\n5. order index sequential within then-branch"
+        }
+      ]
+    },
+    {
+      "id": "ac-test-drag-connect",
+      "name": "AC-004: Drag Handle to Connect (Level C)",
+      "type": "Requirement",
+      "description": "Verification that dragging from a connection handle creates an arrow edge.",
+      "testcases": [
+        {
+          "name": "ACCEPT-004",
+          "description": "User drags from Activity A bottom handle to Activity B top handle",
+          "type": "Acceptance Test",
+          "Input": "Hover Activity A to show handle then drag to Activity B top then release on highlight",
+          "acceptanceCriteria": "1. Dashed line follows mouse during drag\n2. Activity B top highlights as target\n3. Solid arrow A->B appears after release\n4. Edge model: source=A.id, target=B.id\n5. Code shows arrow at correct position"
+        }
+      ]
+    },
+    {
+      "id": "ac-test-position-preserve",
+      "name": "AC-005: Free Position Persistence Across Code Edits",
+      "type": "Requirement",
+      "description": "Verification that user-positioned elements retain coordinates when code triggers re-parse.",
+      "testcases": [
+        {
+          "name": "ACCEPT-005",
+          "description": "User positions three activities, edits one in code",
+          "type": "Acceptance Test",
+          "Input": "1. Place A at (300,150), B at (150,400), C at default\n2. Modify C text in code editor",
+          "acceptanceCriteria": "1. After code edit, A and B positions unchanged (fingerprint match)\n2. C text updates, position retained\n3. No elements flicker or jump to grid"
+        }
+      ]
+    },
+    {
+      "id": "ac-test-sync-conflict",
+      "name": "AC-006: Bidirectional Sync with Last-Op-Wins",
+      "type": "Requirement",
+      "description": "Verification that concurrent canvas and code edits resolve by last-touch-first.",
+      "testcases": [
+        {
+          "name": "ACCEPT-006",
+          "description": "Concurrent canvas drag and code edit",
+          "type": "Acceptance Test",
+          "Input": "Drag Activity A on canvas while simultaneously typing in code editor",
+          "acceptanceCriteria": "1. Last-modified (by timestamp) wins\n2. No infinite update loop\n3. syncState version counters increment correctly\n4. lastGeneratedPuml guard prevents cyclical re-sync"
+        }
+      ]
+    },
+    {
+      "id": "ac-test-export-puml",
+      "name": "AC-007: One-Click Export to .puml",
+      "type": "Requirement",
+      "description": "Verification that export produces a valid PlantUML file via native save dialog.",
+      "testcases": [
+        {
+          "name": "ACCEPT-007",
+          "description": "Export complete activity diagram to .puml",
+          "type": "Acceptance Test",
+          "Input": "Click Export then choose directory then save as test.puml",
+          "acceptanceCriteria": "1. Native Save dialog shows 'PlantUML Files (*.puml)' filter\n2. File exists at chosen path\n3. File has valid @startuml...@enduml\n4. Rendered by plantuml.com matches diagram structure\n5. No position coordinates in file"
+        }
+      ]
+    },
+    {
+      "id": "ac-test-import-puml",
+      "name": "AC-008: Import .puml with Grid Layout",
+      "type": "Requirement",
+      "description": "Verification that importing a .puml file correctly parses and renders on grid.",
+      "testcases": [
+        {
+          "name": "ACCEPT-008",
+          "description": "Import a valid .puml file",
+          "type": "Acceptance Test",
+          "Input": "File then Import then .puml then select test.puml then Open",
+          "acceptanceCriteria": "1. Canvas displays parsed elements on grid layout\n2. All supported node types identified\n3. Unsupported features as grey placeholder blocks\n4. Nested structures (if-in-if) correctly rebuilt\n5. Code editor shows original text\n6. All elements freely draggable"
+        }
+      ]
+    },
+    {
+      "id": "ac-test-tolerant-parse",
+      "name": "AC-009: Tolerant Parsing of Incomplete PlantUML",
+      "type": "Requirement",
+      "description": "Verification that importing incomplete PlantUML does not crash.",
+      "testcases": [
+        {
+          "name": "ACCEPT-009",
+          "description": "Import a .puml with missing endif",
+          "type": "Acceptance Test",
+          "Input": "Import incomplete.puml (has if without endif)",
+          "acceptanceCriteria": "1. App does not crash\n2. Canvas shows parsed portions\n3. Unparsed text preserved in code editor\n4. Error block on canvas for unparseable section"
+        }
+      ]
+    },
+    {
+      "id": "ac-test-export-png",
+      "name": "AC-010: One-Click Export to PNG",
+      "type": "Requirement",
+      "description": "Verification that PNG export invokes Java rendering and saves the image.",
+      "testcases": [
+        {
+          "name": "ACCEPT-010",
+          "description": "Export diagram as PNG",
+          "type": "Acceptance Test",
+          "Input": "Click Export PNG then choose directory then save",
+          "acceptanceCriteria": "1. Rendering completes within 5 seconds\n2. PNG matches diagram structure\n3. File opens in Windows Photo Viewer\n4. Backend java -jar plantuml.jar -tpng invoked successfully"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel-stakeholder-driver",
+      "name": "stakeholder associates driver",
+      "statement": "Individual Developer experiences the need for intuitive PlantUML editing on Windows",
+      "type": "Association",
+      "source_id": "stakeholder-dev",
+      "target_id": "driver-need",
+      "source_name": "Individual Developer",
+      "target_name": "Need for Intuitive PlantUML Editing on Windows"
+    },
+    {
+      "id": "rel-driver-assessment",
+      "name": "driver associates assessment",
+      "statement": "The need exposes limitations of the current web-based approach",
+      "type": "Association",
+      "source_id": "driver-need",
+      "target_id": "assessment-current",
+      "source_name": "Need for Intuitive PlantUML Editing on Windows",
+      "target_name": "Current Web App Limitations"
+    },
+    {
+      "id": "rel-assessment-goal",
+      "name": "assessment influences goal",
+      "statement": "Assessment of current limitations motivates the goal for a desktop application",
+      "type": "Influence",
+      "source_id": "assessment-current",
+      "target_id": "goal-main",
+      "source_name": "Current Web App Limitations",
+      "target_name": "Windows Desktop PlantUML Editor with Drag-and-Drop"
+    },
+    {
+      "id": "rel-goal-influences-outcome-install",
+      "name": "goal influences install outcome",
+      "statement": "The goal drives the one-click install outcome",
+      "type": "Influence",
+      "source_id": "goal-main",
+      "target_id": "outcome-oneclick-install",
+      "source_name": "Windows Desktop PlantUML Editor with Drag-and-Drop",
+      "target_name": "One-Click Install with Zero Manual Setup"
+    },
+    {
+      "id": "rel-goal-influences-outcome-dragdrop",
+      "name": "goal influences dragdrop outcome",
+      "statement": "The goal drives the drag-and-drop editing outcome",
+      "type": "Influence",
+      "source_id": "goal-main",
+      "target_id": "outcome-dragdrop",
+      "source_name": "Windows Desktop PlantUML Editor with Drag-and-Drop",
+      "target_name": "Visual Drag-and-Drop Editing Experience"
+    },
+    {
+      "id": "rel-goal-associates-principle-free",
+      "name": "goal associates free-position principle",
+      "statement": "The goal establishes the free-position-canvas principle",
+      "type": "Association",
+      "source_id": "goal-main",
+      "target_id": "principle-free-position",
+      "source_name": "Windows Desktop PlantUML Editor with Drag-and-Drop",
+      "target_name": "Free Positioning Canvas"
+    },
+    {
+      "id": "rel-goal-associates-principle-sync",
+      "name": "goal associates last-op-wins principle",
+      "statement": "The goal establishes the last-op-wins sync principle",
+      "type": "Association",
+      "source_id": "goal-main",
+      "target_id": "principle-last-op-wins",
+      "source_name": "Windows Desktop PlantUML Editor with Drag-and-Drop",
+      "target_name": "Last Operation Wins for Bidirectional Sync"
+    },
+    {
+      "id": "rel-goal-associates-principle-import",
+      "name": "goal associates tolerant-import principle",
+      "statement": "The goal establishes the tolerant import principle",
+      "type": "Association",
+      "source_id": "goal-main",
+      "target_id": "principle-tolerant-import",
+      "source_name": "Windows Desktop PlantUML Editor with Drag-and-Drop",
+      "target_name": "Tolerant Import with Unsupported Block Passthrough"
+    },
+    {
+      "id": "rel-principle-free-influences-req-canvas",
+      "name": "free-position influences canvas req",
+      "statement": "Free-position principle shapes the canvas requirement",
+      "type": "Influence",
+      "source_id": "principle-free-position",
+      "target_id": "req-free-canvas",
+      "source_name": "Free Positioning Canvas",
+      "target_name": "Free-Form Canvas with Drag-and-Drop (All Three Levels)"
+    },
+    {
+      "id": "rel-principle-free-influences-req-export",
+      "name": "free-position influences export req",
+      "statement": "Free-position principle shapes export: positions not in .puml",
+      "type": "Influence",
+      "source_id": "principle-free-position",
+      "target_id": "req-export-puml",
+      "source_name": "Free Positioning Canvas",
+      "target_name": "One-Click Export to Valid .puml"
+    },
+    {
+      "id": "rel-principle-sync-influences-req-sync",
+      "name": "last-op-wins influences sync req",
+      "statement": "Last-op-wins principle shapes the sync requirement",
+      "type": "Influence",
+      "source_id": "principle-last-op-wins",
+      "target_id": "req-code-sync",
+      "source_name": "Last Operation Wins for Bidirectional Sync",
+      "target_name": "Bidirectional Code-Canvas Real-Time Sync"
+    },
+    {
+      "id": "rel-principle-import-influences-req-import",
+      "name": "tolerant-import influences import req",
+      "statement": "Tolerant import principle shapes the import requirement",
+      "type": "Influence",
+      "source_id": "principle-tolerant-import",
+      "target_id": "req-import-puml",
+      "source_name": "Tolerant Import with Unsupported Block Passthrough",
+      "target_name": "Import Existing .puml Files with Grid Layout"
+    },
+    {
+      "id": "rel-constraint-java-associates-goal",
+      "name": "no-manual-java constrains goal",
+      "statement": "No-manual-Java constraint affects how the goal is achieved",
+      "type": "Association",
+      "source_id": "constraint-no-manual-java",
+      "target_id": "goal-main",
+      "source_name": "No Manual Java Installation Required",
+      "target_name": "Windows Desktop PlantUML Editor with Drag-and-Drop"
+    },
+    {
+      "id": "rel-constraint-python-associates-goal",
+      "name": "no-manual-python constrains goal",
+      "statement": "No-manual-Python constraint affects how the goal is achieved",
+      "type": "Association",
+      "source_id": "constraint-no-manual-python",
+      "target_id": "goal-main",
+      "source_name": "No Manual Python Installation Required",
+      "target_name": "Windows Desktop PlantUML Editor with Drag-and-Drop"
+    },
+    {
+      "id": "rel-constraint-valid-associates-req-export",
+      "name": "valid-puml constrains export req",
+      "statement": "Valid .puml constraint shapes the export requirement",
+      "type": "Association",
+      "source_id": "constraint-valid-puml",
+      "target_id": "req-export-puml",
+      "source_name": "Exported .puml Must Be Valid PlantUML",
+      "target_name": "One-Click Export to Valid .puml"
+    },
+    {
+      "id": "rel-constraint-windows-associates-node",
+      "name": "windows-only constrains node",
+      "statement": "Windows-only constraint targets the deployment node",
+      "type": "Association",
+      "source_id": "constraint-windows-only",
+      "target_id": "node-windows",
+      "source_name": "Windows-Only Target (Installer for Windows 10/11 x64)",
+      "target_name": "Windows 10/11 x64 PC"
+    },
+    {
+      "id": "rel-req-canvas-associates-process",
+      "name": "canvas req associates business process",
+      "statement": "The canvas requirement enables the diagram creation business process",
+      "type": "Association",
+      "source_id": "req-free-canvas",
+      "target_id": "business-process-create-diagram",
+      "source_name": "Free-Form Canvas with Drag-and-Drop (All Three Levels)",
+      "target_name": "Create PlantUML Diagram"
+    },
+    {
+      "id": "rel-req-export-associates-process",
+      "name": "export req associates business process",
+      "statement": "The export requirement completes the diagram creation business process",
+      "type": "Association",
+      "source_id": "req-export-puml",
+      "target_id": "business-process-create-diagram",
+      "source_name": "One-Click Export to Valid .puml",
+      "target_name": "Create PlantUML Diagram"
+    },
+    {
+      "id": "rel-process-accesses-model",
+      "name": "process accesses business object",
+      "statement": "The diagram creation process reads and writes the PlantUML model",
+      "type": "Access",
+      "source_id": "business-process-create-diagram",
+      "target_id": "business-object-model",
+      "source_name": "Create PlantUML Diagram",
+      "target_name": "PlantUML Diagram Model (AST)"
+    },
+    {
+      "id": "rel-comp-ast-serves-process",
+      "name": "AST serves business process",
+      "statement": "The AST Data Model serves the diagram creation process as authoritative model",
+      "type": "Serving",
+      "source_id": "comp-ast-model",
+      "target_id": "business-process-create-diagram",
+      "source_name": "AST Data Model",
+      "target_name": "Create PlantUML Diagram"
+    },
+    {
+      "id": "rel-comp-parser-serves-process",
+      "name": "parser serves business process",
+      "statement": "The parser serves the import step of diagram creation",
+      "type": "Serving",
+      "source_id": "comp-puml-parser",
+      "target_id": "business-process-create-diagram",
+      "source_name": "PlantUML Parser Engine",
+      "target_name": "Create PlantUML Diagram"
+    },
+    {
+      "id": "rel-comp-generator-serves-process",
+      "name": "generator serves business process",
+      "statement": "The generator serves the export step of diagram creation",
+      "type": "Serving",
+      "source_id": "comp-puml-generator",
+      "target_id": "business-process-create-diagram",
+      "source_name": "PlantUML Generator Engine",
+      "target_name": "Create PlantUML Diagram"
+    },
+    {
+      "id": "rel-comp-canvas-serves-process",
+      "name": "canvas serves business process",
+      "statement": "The canvas engine serves the visual editing step of diagram creation",
+      "type": "Serving",
+      "source_id": "comp-canvas-engine",
+      "target_id": "business-process-create-diagram",
+      "source_name": "ReactFlow Canvas Engine",
+      "target_name": "Create PlantUML Diagram"
+    },
+    {
+      "id": "rel-comp-parser-realizes-ast",
+      "name": "parser realizes AST model",
+      "statement": "The PlantUML Parser populates the AST Data Model on import",
+      "type": "Realization",
+      "source_id": "comp-puml-parser",
+      "target_id": "comp-ast-model",
+      "source_name": "PlantUML Parser Engine",
+      "target_name": "AST Data Model"
+    },
+    {
+      "id": "rel-comp-generator-realizes-ast",
+      "name": "generator realizes AST model",
+      "statement": "The PlantUML Generator consumes the AST Data Model",
+      "type": "Realization",
+      "source_id": "comp-puml-generator",
+      "target_id": "comp-ast-model",
+      "source_name": "PlantUML Generator Engine",
+      "target_name": "AST Data Model"
+    },
+    {
+      "id": "rel-comp-canvas-realizes-ast",
+      "name": "canvas realizes AST model",
+      "statement": "The Canvas Engine manipulates the AST Data Model during drag-and-drop",
+      "type": "Realization",
+      "source_id": "comp-canvas-engine",
+      "target_id": "comp-ast-model",
+      "source_name": "ReactFlow Canvas Engine",
+      "target_name": "AST Data Model"
+    },
+    {
+      "id": "rel-comp-sync-realizes-ast",
+      "name": "sync engine realizes AST model",
+      "statement": "The Sync Engine keeps the AST Data Model consistent across canvas and code",
+      "type": "Realization",
+      "source_id": "comp-sync-engine",
+      "target_id": "comp-ast-model",
+      "source_name": "Bidirectional Sync Engine",
+      "target_name": "AST Data Model"
+    },
+    {
+      "id": "rel-canvas-triggers-sync",
+      "name": "canvas triggers sync engine",
+      "statement": "Canvas changes trigger the sync engine to update code editor",
+      "type": "Triggering",
+      "source_id": "comp-canvas-engine",
+      "target_id": "comp-sync-engine",
+      "source_name": "ReactFlow Canvas Engine",
+      "target_name": "Bidirectional Sync Engine"
+    },
+    {
+      "id": "rel-code-triggers-sync",
+      "name": "code editor triggers sync engine",
+      "statement": "Code editor changes trigger the sync engine to update canvas",
+      "type": "Triggering",
+      "source_id": "comp-code-editor",
+      "target_id": "comp-sync-engine",
+      "source_name": "Ace Code Editor Integration",
+      "target_name": "Bidirectional Sync Engine"
+    },
+    {
+      "id": "rel-sync-flows-to-code",
+      "name": "sync engine flows to code editor",
+      "statement": "Sync engine pushes canvas state to code editor",
+      "type": "Flow",
+      "source_id": "comp-sync-engine",
+      "target_id": "comp-code-editor",
+      "source_name": "Bidirectional Sync Engine",
+      "target_name": "Ace Code Editor Integration"
+    },
+    {
+      "id": "rel-sync-flows-to-canvas",
+      "name": "sync engine flows to canvas",
+      "statement": "Sync engine pushes parsed code state to canvas",
+      "type": "Flow",
+      "source_id": "comp-sync-engine",
+      "target_id": "comp-canvas-engine",
+      "source_name": "Bidirectional Sync Engine",
+      "target_name": "ReactFlow Canvas Engine"
+    },
+    {
+      "id": "rel-palette-flows-to-canvas",
+      "name": "palette flows to canvas",
+      "statement": "Drag from palette creates new nodes on canvas",
+      "type": "Flow",
+      "source_id": "comp-palette",
+      "target_id": "comp-canvas-engine",
+      "source_name": "Component Palette",
+      "target_name": "ReactFlow Canvas Engine"
+    },
+    {
+      "id": "rel-electron-composes-canvas",
+      "name": "electron shell composes canvas",
+      "statement": "Electron shell contains the Canvas Engine in its renderer process",
+      "type": "Composition",
+      "source_id": "comp-electron-shell",
+      "target_id": "comp-canvas-engine",
+      "source_name": "Electron Desktop Shell",
+      "target_name": "ReactFlow Canvas Engine"
+    },
+    {
+      "id": "rel-electron-composes-palette",
+      "name": "electron shell composes palette",
+      "statement": "Electron shell contains the Component Palette in its renderer process",
+      "type": "Composition",
+      "source_id": "comp-electron-shell",
+      "target_id": "comp-palette",
+      "source_name": "Electron Desktop Shell",
+      "target_name": "Component Palette"
+    },
+    {
+      "id": "rel-electron-composes-code",
+      "name": "electron shell composes code editor",
+      "statement": "Electron shell contains the Ace Code Editor in its renderer process",
+      "type": "Composition",
+      "source_id": "comp-electron-shell",
+      "target_id": "comp-code-editor",
+      "source_name": "Electron Desktop Shell",
+      "target_name": "Ace Code Editor Integration"
+    },
+    {
+      "id": "rel-electron-composes-sync",
+      "name": "electron shell composes sync engine",
+      "statement": "Electron shell contains the Sync Engine in its renderer process",
+      "type": "Composition",
+      "source_id": "comp-electron-shell",
+      "target_id": "comp-sync-engine",
+      "source_name": "Electron Desktop Shell",
+      "target_name": "Bidirectional Sync Engine"
+    },
+    {
+      "id": "rel-electron-composes-ast",
+      "name": "electron shell composes AST model",
+      "statement": "Electron shell contains the AST Data Model in its renderer process",
+      "type": "Composition",
+      "source_id": "comp-electron-shell",
+      "target_id": "comp-ast-model",
+      "source_name": "Electron Desktop Shell",
+      "target_name": "AST Data Model"
+    },
+    {
+      "id": "rel-electron-composes-parser",
+      "name": "electron shell composes parser",
+      "statement": "Electron shell contains the Parser in its renderer process",
+      "type": "Composition",
+      "source_id": "comp-electron-shell",
+      "target_id": "comp-puml-parser",
+      "source_name": "Electron Desktop Shell",
+      "target_name": "PlantUML Parser Engine"
+    },
+    {
+      "id": "rel-electron-composes-generator",
+      "name": "electron shell composes generator",
+      "statement": "Electron shell contains the Generator in its renderer process",
+      "type": "Composition",
+      "source_id": "comp-electron-shell",
+      "target_id": "comp-puml-generator",
+      "source_name": "Electron Desktop Shell",
+      "target_name": "PlantUML Generator Engine"
+    },
+    {
+      "id": "rel-electron-associates-backend",
+      "name": "electron shell associates backend",
+      "statement": "Electron shell spawns and manages the Python backend as a child process",
+      "type": "Association",
+      "source_id": "comp-electron-shell",
+      "target_id": "comp-python-backend",
+      "source_name": "Electron Desktop Shell",
+      "target_name": "Python Render Backend"
+    },
+    {
+      "id": "rel-backend-associates-jre",
+      "name": "backend associates JRE",
+      "statement": "Python backend invokes java via JRE to run PlantUML JAR",
+      "type": "Association",
+      "source_id": "comp-python-backend",
+      "target_id": "tech-jre",
+      "source_name": "Python Render Backend",
+      "target_name": "JRE (jlink Minimal Runtime)"
+    },
+    {
+      "id": "rel-backend-associates-jar",
+      "name": "backend associates plantuml jar",
+      "statement": "Python backend loads plantuml.jar for rendering",
+      "type": "Association",
+      "source_id": "comp-python-backend",
+      "target_id": "tech-plantuml-jar",
+      "source_name": "Python Render Backend",
+      "target_name": "PlantUML JAR"
+    },
+    {
+      "id": "rel-backend-accesses-png",
+      "name": "backend accesses PNG file",
+      "statement": "Python render backend creates PNG images from PlantUML text",
+      "type": "Access",
+      "source_id": "comp-python-backend",
+      "target_id": "tech-png-file",
+      "source_name": "Python Render Backend",
+      "target_name": "PNG Image File"
+    },
+    {
+      "id": "rel-electron-accesses-puml",
+      "name": "electron accesses puml file",
+      "statement": "Electron shell writes the .puml file via native save dialog",
+      "type": "Access",
+      "source_id": "comp-electron-shell",
+      "target_id": "tech-puml-file",
+      "source_name": "Electron Desktop Shell",
+      "target_name": "PlantUML File (.puml)"
+    },
+    {
+      "id": "rel-electron-associates-node",
+      "name": "electron shell associates node",
+      "statement": "Electron application is deployed to the user's Windows PC",
+      "type": "Association",
+      "source_id": "comp-electron-shell",
+      "target_id": "node-windows",
+      "source_name": "Electron Desktop Shell",
+      "target_name": "Windows 10/11 x64 PC"
+    },
+    {
+      "id": "rel-tech-electron-serves-node",
+      "name": "electron runtime serves node",
+      "statement": "The Electron application runs on the Windows PC",
+      "type": "Serving",
+      "source_id": "tech-electron",
+      "target_id": "node-windows",
+      "source_name": "Electron Runtime",
+      "target_name": "Windows 10/11 x64 PC"
+    },
+    {
+      "id": "rel-tech-electron-serves-backend",
+      "name": "electron runtime serves backend",
+      "statement": "Electron runtime provides environment for spawning backend",
+      "type": "Serving",
+      "source_id": "tech-electron",
+      "target_id": "comp-python-backend",
+      "source_name": "Electron Runtime",
+      "target_name": "Python Render Backend"
+    },
+    {
+      "id": "rel-installer-associates-electron",
+      "name": "installer associates electron runtime",
+      "statement": "The NSIS installer bundles the Electron runtime",
+      "type": "Association",
+      "source_id": "tech-installer",
+      "target_id": "tech-electron",
+      "source_name": "NSIS Installer (.exe)",
+      "target_name": "Electron Runtime"
+    },
+    {
+      "id": "rel-installer-associates-backend",
+      "name": "installer associates backend",
+      "statement": "The NSIS installer bundles the Python backend executable",
+      "type": "Association",
+      "source_id": "tech-installer",
+      "target_id": "comp-python-backend",
+      "source_name": "NSIS Installer (.exe)",
+      "target_name": "Python Render Backend"
+    },
+    {
+      "id": "rel-ac-install-associates-outcome",
+      "name": "AC-001 associates install outcome",
+      "statement": "AC-001 verifies the one-click install outcome",
+      "type": "Association",
+      "source_id": "ac-test-install",
+      "target_id": "outcome-oneclick-install",
+      "source_name": "AC-001: Installation and First Launch",
+      "target_name": "One-Click Install with Zero Manual Setup"
+    },
+    {
+      "id": "rel-ac-drag-add-associates-req-canvas",
+      "name": "AC-002 associates canvas req",
+      "statement": "AC-002 verifies the drag-to-add requirement (Level A)",
+      "type": "Association",
+      "source_id": "ac-test-drag-add",
+      "target_id": "req-free-canvas",
+      "source_name": "AC-002: Drag from Palette to Add Element (Level A)",
+      "target_name": "Free-Form Canvas with Drag-and-Drop (All Three Levels)"
+    },
+    {
+      "id": "rel-ac-reorder-associates-req-canvas",
+      "name": "AC-003 associates canvas req",
+      "statement": "AC-003 verifies the drag-to-reorder requirement (Level B)",
+      "type": "Association",
+      "source_id": "ac-test-drag-reorder",
+      "target_id": "req-free-canvas",
+      "source_name": "AC-003: Drag to Reorder (Level B)",
+      "target_name": "Free-Form Canvas with Drag-and-Drop (All Three Levels)"
+    },
+    {
+      "id": "rel-ac-connect-associates-req-canvas",
+      "name": "AC-004 associates canvas req",
+      "statement": "AC-004 verifies the drag-to-connect requirement (Level C)",
+      "type": "Association",
+      "source_id": "ac-test-drag-connect",
+      "target_id": "req-free-canvas",
+      "source_name": "AC-004: Drag Handle to Connect (Level C)",
+      "target_name": "Free-Form Canvas with Drag-and-Drop (All Three Levels)"
+    },
+    {
+      "id": "rel-ac-position-associates-principle-free",
+      "name": "AC-005 associates free-position principle",
+      "statement": "AC-005 verifies the free-position principle",
+      "type": "Association",
+      "source_id": "ac-test-position-preserve",
+      "target_id": "principle-free-position",
+      "source_name": "AC-005: Free Position Persistence Across Code Edits",
+      "target_name": "Free Positioning Canvas"
+    },
+    {
+      "id": "rel-ac-sync-associates-principle-sync",
+      "name": "AC-006 associates last-op-wins principle",
+      "statement": "AC-006 verifies the last-op-wins sync principle",
+      "type": "Association",
+      "source_id": "ac-test-sync-conflict",
+      "target_id": "principle-last-op-wins",
+      "source_name": "AC-006: Bidirectional Sync with Last-Op-Wins",
+      "target_name": "Last Operation Wins for Bidirectional Sync"
+    },
+    {
+      "id": "rel-ac-export-associates-req-export",
+      "name": "AC-007 associates export req",
+      "statement": "AC-007 verifies the one-click export requirement",
+      "type": "Association",
+      "source_id": "ac-test-export-puml",
+      "target_id": "req-export-puml",
+      "source_name": "AC-007: One-Click Export to .puml",
+      "target_name": "One-Click Export to Valid .puml"
+    },
+    {
+      "id": "rel-ac-import-associates-req-import",
+      "name": "AC-008 associates import req",
+      "statement": "AC-008 verifies the import requirement",
+      "type": "Association",
+      "source_id": "ac-test-import-puml",
+      "target_id": "req-import-puml",
+      "source_name": "AC-008: Import .puml with Grid Layout",
+      "target_name": "Import Existing .puml Files with Grid Layout"
+    },
+    {
+      "id": "rel-ac-tolerant-associates-principle-import",
+      "name": "AC-009 associates tolerant-import principle",
+      "statement": "AC-009 verifies the tolerant import principle",
+      "type": "Association",
+      "source_id": "ac-test-tolerant-parse",
+      "target_id": "principle-tolerant-import",
+      "source_name": "AC-009: Tolerant Parsing of Incomplete PlantUML",
+      "target_name": "Tolerant Import with Unsupported Block Passthrough"
+    },
+    {
+      "id": "rel-ac-png-associates-req-png",
+      "name": "AC-010 associates PNG export req",
+      "statement": "AC-010 verifies the PNG export requirement",
+      "type": "Association",
+      "source_id": "ac-test-export-png",
+      "target_id": "req-export-png",
+      "source_name": "AC-010: One-Click Export to PNG",
+      "target_name": "One-Click Export to PNG via Java Rendering"
+    }
+  ],
+  "views": [
+    {
+      "view_id": "SystemArchitecture",
+      "view_name": "SystemArchitecture",
+      "description": "Top-level view: goal, outcomes, business process, electron shell, deployment node, installer.",
+      "included_elements": [
+        "goal-main",
+        "outcome-oneclick-install",
+        "outcome-dragdrop",
+        "business-process-create-diagram",
+        "comp-electron-shell",
+        "node-windows",
+        "tech-installer"
+      ],
+      "included_relationships": [
+        "rel-goal-influences-outcome-install",
+        "rel-goal-influences-outcome-dragdrop",
+        "rel-electron-associates-node"
+      ]
+    },
+    {
+      "view_id": "Motivation-Overview",
+      "view_name": "Motivation Overview",
+      "description": "Stakeholder, driver, assessment, and primary goal.",
+      "parent_element_id": "goal-main",
+      "parent_element_name": "Windows Desktop PlantUML Editor with Drag-and-Drop",
+      "included_elements": [
+        "stakeholder-dev",
+        "driver-need",
+        "assessment-current",
+        "goal-main"
+      ],
+      "included_relationships": [
+        "rel-stakeholder-driver",
+        "rel-driver-assessment",
+        "rel-assessment-goal"
+      ]
+    },
+    {
+      "view_id": "Principles-Requirements",
+      "view_name": "Principles and Core Requirements",
+      "description": "Three architecture principles and four core requirements they influence.",
+      "parent_element_id": "goal-main",
+      "parent_element_name": "Windows Desktop PlantUML Editor with Drag-and-Drop",
+      "included_elements": [
+        "goal-main",
+        "principle-free-position",
+        "principle-last-op-wins",
+        "req-free-canvas",
+        "req-export-puml",
+        "req-code-sync"
+      ],
+      "included_relationships": [
+        "rel-goal-associates-principle-free",
+        "rel-goal-associates-principle-sync",
+        "rel-principle-free-influences-req-canvas",
+        "rel-principle-free-influences-req-export",
+        "rel-principle-sync-influences-req-sync"
+      ]
+    },
+    {
+      "view_id": "Motivation-Constraints",
+      "view_name": "Architecture Constraints",
+      "description": "Four architecture constraints and tolerant-import principle with its influenced requirement.",
+      "parent_element_id": "goal-main",
+      "parent_element_name": "Windows Desktop PlantUML Editor with Drag-and-Drop",
+      "included_elements": [
+        "goal-main",
+        "principle-tolerant-import",
+        "constraint-no-manual-java",
+        "constraint-no-manual-python",
+        "constraint-valid-puml",
+        "req-import-puml",
+        "req-export-puml"
+      ],
+      "included_relationships": [
+        "rel-goal-associates-principle-import",
+        "rel-constraint-java-associates-goal",
+        "rel-constraint-python-associates-goal",
+        "rel-constraint-valid-associates-req-export",
+        "rel-principle-import-influences-req-import"
+      ]
+    },
+    {
+      "view_id": "BusinessLayer",
+      "view_name": "Business Layer",
+      "description": "Business process, business object, requirements, and serving application components.",
+      "parent_element_id": "business-process-create-diagram",
+      "parent_element_name": "Create PlantUML Diagram",
+      "included_elements": [
+        "business-process-create-diagram",
+        "business-object-model",
+        "comp-ast-model",
+        "req-free-canvas",
+        "req-export-puml",
+        "comp-canvas-engine"
+      ],
+      "included_relationships": [
+        "rel-process-accesses-model",
+        "rel-comp-ast-serves-process",
+        "rel-comp-canvas-serves-process",
+        "rel-req-canvas-associates-process",
+        "rel-req-export-associates-process"
+      ]
+    },
+    {
+      "view_id": "AST-Foundation",
+      "view_name": "AST Foundation Layer",
+      "description": "AST Data Model with parser and generator engines.",
+      "parent_element_id": "comp-ast-model",
+      "parent_element_name": "AST Data Model",
+      "included_elements": [
+        "comp-ast-model",
+        "comp-puml-parser",
+        "comp-puml-generator",
+        "business-process-create-diagram"
+      ],
+      "included_relationships": [
+        "rel-comp-parser-realizes-ast",
+        "rel-comp-generator-realizes-ast",
+        "rel-comp-parser-serves-process",
+        "rel-comp-generator-serves-process"
+      ]
+    },
+    {
+      "view_id": "Canvas-Interaction",
+      "view_name": "Canvas and Interaction Layer",
+      "description": "Canvas engine, palette, sync engine, and their data flows.",
+      "parent_element_id": "req-free-canvas",
+      "parent_element_name": "Free-Form Canvas with Drag-and-Drop (All Three Levels)",
+      "included_elements": [
+        "comp-canvas-engine",
+        "comp-palette",
+        "comp-sync-engine",
+        "comp-code-editor",
+        "comp-ast-model"
+      ],
+      "included_relationships": [
+        "rel-comp-canvas-realizes-ast",
+        "rel-comp-sync-realizes-ast",
+        "rel-palette-flows-to-canvas",
+        "rel-canvas-triggers-sync",
+        "rel-code-triggers-sync",
+        "rel-sync-flows-to-canvas",
+        "rel-sync-flows-to-code"
+      ]
+    },
+    {
+      "view_id": "Electron-Shell-Composition",
+      "view_name": "Electron Shell Composition",
+      "description": "Electron shell composes all renderer-process application components.",
+      "parent_element_id": "comp-electron-shell",
+      "parent_element_name": "Electron Desktop Shell",
+      "included_elements": [
+        "comp-electron-shell",
+        "comp-canvas-engine",
+        "comp-code-editor",
+        "comp-ast-model",
+        "comp-sync-engine",
+        "comp-palette"
+      ],
+      "included_relationships": [
+        "rel-electron-composes-canvas",
+        "rel-electron-composes-code",
+        "rel-electron-composes-sync",
+        "rel-electron-composes-ast",
+        "rel-electron-composes-palette"
+      ]
+    },
+    {
+      "view_id": "Electron-Shell-Backend",
+      "view_name": "Electron Shell Backend Association",
+      "description": "Electron shell associates with Python backend and composes parser/generator.",
+      "parent_element_id": "comp-electron-shell",
+      "parent_element_name": "Electron Desktop Shell",
+      "included_elements": [
+        "comp-electron-shell",
+        "comp-python-backend",
+        "comp-puml-parser",
+        "comp-puml-generator"
+      ],
+      "included_relationships": [
+        "rel-electron-associates-backend",
+        "rel-electron-composes-parser",
+        "rel-electron-composes-generator"
+      ]
+    },
+    {
+      "view_id": "TechnologyLayer",
+      "view_name": "Technology Layer",
+      "description": "Windows node, Electron runtime, JRE, PlantUML JAR, and installer.",
+      "parent_element_id": "comp-electron-shell",
+      "parent_element_name": "Electron Desktop Shell",
+      "included_elements": [
+        "node-windows",
+        "tech-electron",
+        "tech-jre",
+        "tech-plantuml-jar",
+        "tech-installer",
+        "comp-python-backend"
+      ],
+      "included_relationships": [
+        "rel-tech-electron-serves-node",
+        "rel-tech-electron-serves-backend",
+        "rel-backend-associates-jre",
+        "rel-backend-associates-jar",
+        "rel-installer-associates-electron",
+        "rel-installer-associates-backend"
+      ]
+    },
+    {
+      "view_id": "Acceptance-Install-Export",
+      "view_name": "Acceptance: Install and Export",
+      "description": "Acceptance testcases for install, export .puml, and export PNG.",
+      "parent_element_id": "goal-main",
+      "parent_element_name": "Windows Desktop PlantUML Editor with Drag-and-Drop",
+      "included_elements": [
+        "ac-test-install",
+        "ac-test-export-puml",
+        "ac-test-export-png",
+        "outcome-oneclick-install",
+        "req-export-puml",
+        "req-export-png"
+      ],
+      "included_relationships": [
+        "rel-ac-install-associates-outcome",
+        "rel-ac-export-associates-req-export",
+        "rel-ac-png-associates-req-png"
+      ]
+    },
+    {
+      "view_id": "Acceptance-Interaction",
+      "view_name": "Acceptance: Canvas Interaction",
+      "description": "Acceptance testcases for drag-add, drag-reorder, drag-connect, position-preserve, and sync-conflict.",
+      "parent_element_id": "goal-main",
+      "parent_element_name": "Windows Desktop PlantUML Editor with Drag-and-Drop",
+      "included_elements": [
+        "ac-test-drag-add",
+        "ac-test-drag-reorder",
+        "ac-test-drag-connect",
+        "ac-test-position-preserve",
+        "req-free-canvas",
+        "principle-free-position",
+        "principle-last-op-wins"
+      ],
+      "included_relationships": [
+        "rel-ac-drag-add-associates-req-canvas",
+        "rel-ac-reorder-associates-req-canvas",
+        "rel-ac-connect-associates-req-canvas",
+        "rel-ac-position-associates-principle-free"
+      ]
+    },
+    {
+      "view_id": "Acceptance-Parse",
+      "view_name": "Acceptance: Import and Parse",
+      "description": "Acceptance testcases for import, tolerant parsing, and their verified elements.",
+      "parent_element_id": "goal-main",
+      "parent_element_name": "Windows Desktop PlantUML Editor with Drag-and-Drop",
+      "included_elements": [
+        "ac-test-import-puml",
+        "ac-test-tolerant-parse",
+        "ac-test-sync-conflict",
+        "req-import-puml",
+        "principle-tolerant-import",
+        "principle-last-op-wins"
+      ],
+      "included_relationships": [
+        "rel-ac-import-associates-req-import",
+        "rel-ac-tolerant-associates-principle-import",
+        "rel-ac-sync-associates-principle-sync"
+      ]
+    },
+    {
+      "view_id": "Technology-Assets",
+      "view_name": "Technology Assets and Artifacts",
+      "description": "File artifacts and remaining unplaced elements.",
+      "parent_element_id": "node-windows",
+      "parent_element_name": "Windows 10/11 x64 PC",
+      "included_elements": [
+        "tech-puml-file",
+        "tech-png-file",
+        "comp-python-backend",
+        "comp-electron-shell",
+        "node-windows",
+        "constraint-windows-only"
+      ],
+      "included_relationships": [
+        "rel-backend-accesses-png",
+        "rel-electron-accesses-puml",
+        "rel-constraint-windows-associates-node"
+      ]
+    },
+    {
+      "view_id": "Supplementary-Reqs",
+      "view_name": "Supplementary Requirements",
+      "description": "Remaining requirements and constraints not yet placed in other views.",
+      "parent_element_id": "goal-main",
+      "parent_element_name": "Windows Desktop PlantUML Editor with Drag-and-Drop",
+      "included_elements": [
+        "req-activity-diagram",
+        "constraint-windows-only",
+        "goal-main"
+      ],
+      "included_relationships": []
+    }
+  ]
+}
