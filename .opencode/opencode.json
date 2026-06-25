@@ -1,0 +1,12 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "skill": "allow"
+  },
+  "mcp": {
+    "argo": {
+      "type": "local",
+      "command": ["node", ".argo/scripts/argo-mcp-server.js"]
+    }
+  }
+}
